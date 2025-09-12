@@ -1,11 +1,12 @@
 package net.codejava.job;
 
-import net.codejava.service.BookingService;
+import org.quartz.DisallowConcurrentExecution;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
-import org.quartz.DisallowConcurrentExecution;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import net.codejava.service.BookingService;
 
 @DisallowConcurrentExecution
 public class BookingCarCancelSyncJob implements Job {
@@ -14,8 +15,7 @@ public class BookingCarCancelSyncJob implements Job {
     private BookingService bookingService;
 
     @Override
-    public void execute(JobExecutionContext context)
-            throws JobExecutionException {
+    public void execute(JobExecutionContext context) throws JobExecutionException {
         bookingService.syncCancelStatus();
     }
 }

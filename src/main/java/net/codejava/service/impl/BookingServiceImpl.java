@@ -20,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 import net.codejava.constant.MailTemplate;
 import net.codejava.constant.MetaConstant;
 import net.codejava.domain.dto.booking.*;
+import net.codejava.domain.dto.booking.ReturnCarRequestDTO;
 import net.codejava.domain.dto.meta.MetaRequestDTO;
 import net.codejava.domain.dto.meta.MetaResponseDTO;
 import net.codejava.domain.dto.meta.SortingDTO;
@@ -44,7 +45,7 @@ import net.codejava.service.CarService;
 import net.codejava.service.TransactionService;
 import net.codejava.utility.MailSenderUtil;
 import net.codejava.utility.TimeUtil;
-import net.codejava.domain.dto.booking.ReturnCarRequestDTO;
+
 @Service
 @RequiredArgsConstructor
 @EnableTransactionManagement
@@ -107,18 +108,37 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public MetaResponse<MetaResponseDTO, List<BookingResponseDTO>> getListBookingForUserManager(MetaRequestDTO requestDTO, Integer userId) {
+    public MetaResponse<MetaResponseDTO, List<BookingResponseDTO>> getListBookingForUserManager(
+            BookingFilterDTO requestDTO, Integer userId) {
         Optional<User> findUser = userRepo.findById(userId);
         if (findUser.isEmpty()) throw new AppException("This user is not existed");
+        Pageable pageable = PageRequest.of(requestDTO.getCurrentPage(), requestDTO.getLimit());
+        BookingStatus status = null;
+        if (requestDTO.getBookingStatus() != null) {
+            try {
+                status = BookingStatus.valueOf(requestDTO.getBookingStatus());
+            } catch (IllegalArgumentException e) {
+                throw new AppException("Trạng thái booking không hợp lệ");
+            }
+        }
 
-        Sort sort = requestDTO.sortDir().equals(MetaConstant.Sorting.DEFAULT_DIRECTION)
-                ? Sort.by(requestDTO.sortField()).ascending()
-                : Sort.by(requestDTO.sortField()).descending();
-        Pageable pageable = PageRequest.of(requestDTO.currentPage(), requestDTO.pageSize(), sort);
-
-        Page<Booking> page = requestDTO.keyword() == null
-                ? bookingRepo.getListBookingByOwnerId(userId, pageable)
-                : bookingRepo.getListBookingByOwnerIdWithKeyword(userId, requestDTO.keyword(), pageable);
+        LocalDateTime startDateTime = null;
+        LocalDateTime endDateTime = null;
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        if (requestDTO.getStartDateTime() != null && !requestDTO.getStartDateTime().isEmpty()) {
+            startDateTime = LocalDateTime.parse(requestDTO.getStartDateTime(), formatter);
+        }
+        if (requestDTO.getEndDateTime() != null && !requestDTO.getEndDateTime().isEmpty()) {
+            endDateTime = LocalDateTime.parse(requestDTO.getEndDateTime(), formatter);
+        }
+        Page<Booking> page = bookingRepo.findBookingsByFilter(
+                userId,
+                status,
+                requestDTO.getCarName(),
+                startDateTime,
+                endDateTime,
+                pageable
+        );
 
         if (page.getContent().isEmpty()) throw new AppException("List booking is empty");
 
@@ -131,16 +151,11 @@ public class BookingServiceImpl implements BookingService {
                 MetaResponseDTO.builder()
                         .totalItems((int) page.getTotalElements())
                         .totalPages(page.getTotalPages())
-                        .currentPage(requestDTO.currentPage())
-                        .pageSize(requestDTO.pageSize())
-                        .sorting(SortingDTO.builder()
-                                .sortField(requestDTO.sortField())
-                                .sortDir(requestDTO.sortDir())
-                                .build())
+                        .currentPage(requestDTO.getCurrentPage())
+                        .pageSize(requestDTO.getLimit())
                         .build(),
                 li);
     }
-
 
     @Override
     public MetaResponse<MetaResponseDTO, List<BookingResponseForOwnerDTO>> getListBookingByCarId(
@@ -154,7 +169,7 @@ public class BookingServiceImpl implements BookingService {
         Page<Booking> page = metaRequestDTO.keyword() == null
                 ? bookingRepo.getListBookingByCarId(carId, pageable)
                 : bookingRepo.getListBookingByUserId(carId, pageable);
-        //if (page.getContent().isEmpty()) throw new AppException("List booking is empty");
+        // if (page.getContent().isEmpty()) throw new AppException("List booking is empty");
         List<BookingResponseForOwnerDTO> li = page.getContent().stream()
                 .map(temp -> bookingMapper.toBookingResponseForOwnerDto(temp))
                 .toList();
@@ -253,7 +268,7 @@ public class BookingServiceImpl implements BookingService {
                     .user(owner)
                     .build();
             transactionService.addTransaction(ownerTran);
-            //Update isAvailable of Car
+            // Update isAvailable of Car
             car.setIsAvailable(false);
             carRepo.save(car);
             // Send Mail To Owner
@@ -275,17 +290,17 @@ public class BookingServiceImpl implements BookingService {
         }
     }
 
-//    @Override
-//    @Transactional
-//    public Response<String> confirmPickUpCar( Integer bookingId) {
-//        if (booking.getStatus() == BookingStatus.CONFIRMED) {
-//            booking.setStatus(BookingStatus.PICK_UP);
-//            bookingRepo.save(booking);
-//            return Response.successfulResponse("Khách hàng đã nhận xe thành công.");
-//        } else {
-//            throw new AppException("Trạng thái đơn hàng không cho phép nhận xe.");
-//        }
-//    }
+    //    @Override
+    //    @Transactional
+    //    public Response<String> confirmPickUpCar( Integer bookingId) {
+    //        if (booking.getStatus() == BookingStatus.CONFIRMED) {
+    //            booking.setStatus(BookingStatus.PICK_UP);
+    //            bookingRepo.save(booking);
+    //            return Response.successfulResponse("Khách hàng đã nhận xe thành công.");
+    //        } else {
+    //            throw new AppException("Trạng thái đơn hàng không cho phép nhận xe.");
+    //        }
+    //    }
 
     @Override
     public Response<BookingDetailResponseDTO> updateBooking(Integer bookingId, UpdBookingRequestDTO requestDTO) {
@@ -293,8 +308,7 @@ public class BookingServiceImpl implements BookingService {
         if (oldBooking.isEmpty()) throw new AppException("This booking is not existed");
 
         // Check status allow to edit
-        if (
-                oldBooking.get().getStatus() == BookingStatus.CANCELLED
+        if (oldBooking.get().getStatus() == BookingStatus.CANCELLED
                 || oldBooking.get().getStatus() == BookingStatus.COMPLETED)
             throw new AppException("Don't allow to edit this booking");
 
@@ -511,7 +525,7 @@ public class BookingServiceImpl implements BookingService {
         return Response.successfulResponse(message);
     }
 
-    //Hàm được gọi khi chủ xe xác nhận đã kiểm tra xe và hoàn tất việc trả xe
+    // Hàm được gọi khi chủ xe xác nhận đã kiểm tra xe và hoàn tất việc trả xe
     @Transactional
     public Response<String> completeReturnCar(ReturnCarRequestDTO dto) {
         Optional<Booking> findBooking = bookingRepo.findById(dto.getBookingId());
@@ -549,8 +563,7 @@ public class BookingServiceImpl implements BookingService {
         return Response.successfulResponse("Trả xe và kiểm tra xe thành công.");
     }
 
-
-    //logic job
+    // logic job
 
     /**
      * Quét nếu quá thời gian đặt mà chưa confirm thì chuyển trạng thái hủy và -> available
@@ -558,15 +571,16 @@ public class BookingServiceImpl implements BookingService {
     @Transactional
     public void syncCancelStatus() {
         LocalDateTime now = LocalDateTime.now();
-//        // Quét các booking PENDING_DEPOSIT quá hạn
-//        List<Booking> pendingBookings = bookingRepo.findAllByStatusAndStartDateTimeBefore(BookingStatus.CONFIRMED, now);
-//        for (Booking booking : pendingBookings) {
-//            booking.setStatus(BookingStatus.CANCELLED);
-//            Car car = booking.getCar();
-//            car.setIsAvailable(true);
-//            carRepo.save(car);
-//            bookingRepo.save(booking);
-//        }
+        //        // Quét các booking PENDING_DEPOSIT quá hạn
+        //        List<Booking> pendingBookings =
+        // bookingRepo.findAllByStatusAndStartDateTimeBefore(BookingStatus.CONFIRMED, now);
+        //        for (Booking booking : pendingBookings) {
+        //            booking.setStatus(BookingStatus.CANCELLED);
+        //            Car car = booking.getCar();
+        //            car.setIsAvailable(true);
+        //            carRepo.save(car);
+        //            bookingRepo.save(booking);
+        //        }
 
         // Quét các booking CONFIRMED quá hạn 30 phút chưa nhận xe
         List<Booking> confirmedBookings = bookingRepo.findAllByStatus(BookingStatus.CONFIRMED);
@@ -585,10 +599,7 @@ public class BookingServiceImpl implements BookingService {
                 String template = MailTemplate.CANCEL_BOOKING.CANCEL_BOOKING_TEMPLATE;
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
                 String cancelTime = now.format(formatter);
-                Map<String, Object> variable = Map.of(
-                        "carName", car.getName(),
-                        "cancelTime", cancelTime
-                );
+                Map<String, Object> variable = Map.of("carName", car.getName(), "cancelTime", cancelTime);
                 try {
                     mailSenderUtil.sendMailWithHTML(toMail, subject, template, variable);
                 } catch (jakarta.mail.MessagingException e) {
@@ -602,7 +613,7 @@ public class BookingServiceImpl implements BookingService {
     /**
      * * Neu thời gian trả quá hạn thì chuyển trạng thái hoàn thành và -> not available, isactive -> not active
      */
-    public void syncCarBookingComplete(){
+    public void syncCarBookingComplete() {
         System.out.println("[SYNC] Đồng bộ car-booking tại ");
     }
 }

@@ -2,7 +2,6 @@ package net.codejava.domain.dto.user;
 
 import net.codejava.annotation.EnumValid;
 import net.codejava.annotation.PasswordMatching;
-import net.codejava.annotation.StrongPassword;
 import net.codejava.domain.enums.UserType;
 
 @PasswordMatching(
@@ -10,8 +9,8 @@ import net.codejava.domain.enums.UserType;
         confirmPassword = "confirmPassword",
         message = "Password and Confirm password " + "don’t match. Please try again.")
 public record AddUserRequestDTO(
-//        @StrongPassword
-         String password,
+        //        @StrongPassword
+        String password,
         String confirmPassword,
         String username,
         String email,

@@ -63,6 +63,7 @@ public class Car {
     private Double rating;
     private Boolean isActive;
     private Boolean isAvailable;
+
     @Column(name = "is_stopped", columnDefinition = "boolean default false")
     private Boolean isStopped;
 

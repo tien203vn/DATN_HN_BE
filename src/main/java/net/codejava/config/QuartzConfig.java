@@ -1,10 +1,11 @@
 package net.codejava.config;
 
-import net.codejava.job.BookingCarCompleteJob;
-import org.springframework.context.annotation.Configuration;
-import net.codejava.job.BookingCarCancelSyncJob;
 import org.quartz.*;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+import net.codejava.job.BookingCarCancelSyncJob;
+import net.codejava.job.BookingCarCompleteJob;
 
 @Configuration
 public class QuartzConfig {
@@ -22,7 +23,7 @@ public class QuartzConfig {
                 .forJob(bookingCarSyncJobDetail)
                 .withIdentity("bookingCarSyncTrigger", "sync-status-trigger")
                 .withSchedule(SimpleScheduleBuilder.simpleSchedule()
-                        .withIntervalInSeconds(60)   // chạy mỗi 10 giây
+                        .withIntervalInSeconds(60) // chạy mỗi 10 giây
                         .repeatForever())
                 .build();
     }
@@ -42,9 +43,8 @@ public class QuartzConfig {
                 .forJob(bookingCarCompleteSyncJobDetail())
                 .withIdentity("bookingCarSyncTrigger", "sync-active-job")
                 .withSchedule(SimpleScheduleBuilder.simpleSchedule()
-                        .withIntervalInSeconds(60)   // chạy mỗi 10 giây
+                        .withIntervalInSeconds(60) // chạy mỗi 10 giây
                         .repeatForever())
                 .build();
     }
-
 }

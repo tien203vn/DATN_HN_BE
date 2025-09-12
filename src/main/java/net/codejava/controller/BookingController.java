@@ -35,10 +35,11 @@ public class BookingController {
 
     @GetMapping(Endpoint.V1.Booking.GET_LIST_BOOKING)
     public ResponseEntity<MetaResponse<MetaResponseDTO, List<BookingResponseDTO>>> getListBookingForUserManager(
-            HttpServletRequest servletRequest, @ParameterObject MetaRequestDTO metaRequestDTO) {
+            HttpServletRequest servletRequest, @ParameterObject BookingFilterDTO metaRequestDTO) {
         Integer userId =
                 Integer.valueOf(jwtTokenUtil.getAccountId(servletRequest.getHeader(HttpHeaders.AUTHORIZATION)));
-        return ResponseEntity.status(HttpStatus.OK).body(bookingService.getListBookingForUserManager(metaRequestDTO, userId));
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(bookingService.getListBookingForUserManager(metaRequestDTO, userId));
     }
 
     @GetMapping(Endpoint.V1.Booking.GET_LIST_FOR_USER)

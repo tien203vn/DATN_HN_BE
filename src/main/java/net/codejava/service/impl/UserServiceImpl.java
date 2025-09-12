@@ -6,18 +6,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import net.codejava.constant.MetaConstant;
-import net.codejava.domain.dto.booking.BookingResponseDTO;
-import net.codejava.domain.dto.meta.MetaRequestDTO;
-import net.codejava.domain.dto.meta.MetaResponseDTO;
-import net.codejava.domain.dto.user.UserBookingCountDTO;
-import net.codejava.repository.BookingRepository;
-import net.codejava.responses.MetaResponse;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -25,15 +16,20 @@ import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 import net.codejava.constant.DefaultAvatar;
 import net.codejava.domain.dto.auth.LoginResponseDTO;
+import net.codejava.domain.dto.meta.MetaRequestDTO;
+import net.codejava.domain.dto.meta.MetaResponseDTO;
 import net.codejava.domain.dto.user.AddUserRequestDTO;
 import net.codejava.domain.dto.user.UpdUserRequestDTO;
+import net.codejava.domain.dto.user.UserBookingCountDTO;
 import net.codejava.domain.dto.user.UserDetailResponseDTO;
 import net.codejava.domain.entity.Image;
 import net.codejava.domain.entity.User;
 import net.codejava.domain.mapper.UserMapper;
 import net.codejava.exceptions.AppException;
+import net.codejava.repository.BookingRepository;
 import net.codejava.repository.ImageRepository;
 import net.codejava.repository.UserRepository;
+import net.codejava.responses.MetaResponse;
 import net.codejava.responses.Response;
 import net.codejava.service.CloudinaryService;
 import net.codejava.service.UserService;
@@ -119,9 +115,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public MetaResponse<MetaResponseDTO, List<UserBookingCountDTO>> getListUserBooking(MetaRequestDTO requestDTO, Integer ownerId) {
+    public MetaResponse<MetaResponseDTO, List<UserBookingCountDTO>> getListUserBooking(
+            MetaRequestDTO requestDTO, Integer ownerId) {
         Pageable pageable = PageRequest.of(requestDTO.currentPage(), requestDTO.pageSize());
-        List<Object[]> results = bookingRepo.getListCustomerWithBookingCountByOwnerId(ownerId,requestDTO.keyword(), pageable);
+        List<Object[]> results =
+                bookingRepo.getListCustomerWithBookingCountByOwnerId(ownerId, requestDTO.keyword(), pageable);
 
         if (results.isEmpty()) throw new AppException("Danh sách khách hàng trống");
 

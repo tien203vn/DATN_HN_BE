@@ -52,7 +52,7 @@ public class TransactionServiceImpl implements TransactionService {
         if (endTime != null) endTime += " 23:59";
         Page<Transaction> page =
                 transactionRepo.getListByUserId(userId, filterRequestDTO.startTime(), endTime, pageable);
-        //if (page.isEmpty()) throw new AppException("Transaction list is empty");
+        // if (page.isEmpty()) throw new AppException("Transaction list is empty");
         List<TransactionResponseDTO> liRes = page.getContent().stream()
                 .map(temp -> transactionMapper.toTransactionResponseDTO(temp))
                 .toList();

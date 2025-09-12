@@ -6,12 +6,6 @@ import java.util.Map;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
-import net.codejava.domain.dto.booking.BookingResponseDTO;
-import net.codejava.domain.dto.meta.MetaRequestDTO;
-import net.codejava.domain.dto.meta.MetaResponseDTO;
-import net.codejava.domain.dto.user.UserBookingCountDTO;
-import net.codejava.responses.MetaResponse;
-import net.codejava.utility.JwtTokenUtil;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -24,12 +18,17 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import net.codejava.constant.Endpoint;
+import net.codejava.domain.dto.meta.MetaRequestDTO;
+import net.codejava.domain.dto.meta.MetaResponseDTO;
 import net.codejava.domain.dto.user.UpdUserRequestDTO;
+import net.codejava.domain.dto.user.UserBookingCountDTO;
 import net.codejava.domain.dto.user.UserDetailResponseDTO;
 import net.codejava.domain.entity.User;
+import net.codejava.responses.MetaResponse;
 import net.codejava.responses.Response;
 import net.codejava.service.UserService;
 import net.codejava.utility.AuthUtil;
+import net.codejava.utility.JwtTokenUtil;
 
 @Tag(name = "User Controller", description = "APIs related to User operations")
 @RestController
@@ -38,6 +37,7 @@ import net.codejava.utility.AuthUtil;
 public class UserController {
     private final UserService userService;
     private final JwtTokenUtil jwtTokenUtil;
+
     @Operation(summary = "Get Detail User For User", description = "This API allows users to get detail user.")
     @GetMapping(Endpoint.V1.User.GET_DETAIL)
     public ResponseEntity<Response<UserDetailResponseDTO>> getDetailUser() {
@@ -55,7 +55,7 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(userService.updateUser(user.getId(), requestDTO));
     }
 
-//    @Operation(summary = "Update User For User", description = "This API allows users to update user.")
+    //    @Operation(summary = "Update User For User", description = "This API allows users to update user.")
     @GetMapping(Endpoint.V1.User.GET_USER_BOOKING)
     public ResponseEntity<MetaResponse<MetaResponseDTO, List<UserBookingCountDTO>>> getListBookingForUserManager(
             HttpServletRequest servletRequest, @ParameterObject MetaRequestDTO metaRequestDTO) {

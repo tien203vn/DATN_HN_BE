@@ -54,9 +54,7 @@ public interface CarRepository extends JpaRepository<Car, Integer> {
             value =
                     "SELECT * FROM cars c WHERE c.is_stopped = false AND c.address LIKE %:address% AND c.is_available = true",
             nativeQuery = true)
-    Page<Car> searchCarV3(
-            @Param("address") String address,
-            Pageable pageable);
+    Page<Car> searchCarV3(@Param("address") String address, Pageable pageable);
 
     @Query(
             value =
@@ -72,38 +70,30 @@ public interface CarRepository extends JpaRepository<Car, Integer> {
             @Param("carId") Integer carId, @Param("startTime") String startTime, @Param("endTime") String endTime);
 
     // Lấy danh sách xe đang hoạt động và chưa được đặt của owner
-    @Query("SELECT DISTINCT c FROM Car c " +
-            "JOIN FETCH c.carOwner co " +
-            "LEFT JOIN FETCH c.images i " +
-            "WHERE co.id = :ownerId AND c.isStopped = false AND c.isAvailable = false")
+    @Query("SELECT DISTINCT c FROM Car c " + "JOIN FETCH c.carOwner co "
+            + "LEFT JOIN FETCH c.images i "
+            + "WHERE co.id = :ownerId AND c.isStopped = false AND c.isAvailable = false")
     Page<Car> getListCarActiveByOwner(@Param("ownerId") Integer ownerId, Pageable pageable);
 
     // Lấy danh sách xe đang hoạt động và chưa được đặt của owner có tìm kiếm theo keyword
-    @Query("SELECT DISTINCT c FROM Car c " +
-            "JOIN FETCH c.carOwner co " +
-            "LEFT JOIN FETCH c.images i " +
-            "WHERE co.id = :ownerId AND c.isStopped = false AND c.isAvailable = false " +
-            "AND CONCAT(c.name,' ',c.brand,' ',c.model,' ',c.address) LIKE %:keyword%")
+    @Query("SELECT DISTINCT c FROM Car c " + "JOIN FETCH c.carOwner co "
+            + "LEFT JOIN FETCH c.images i "
+            + "WHERE co.id = :ownerId AND c.isStopped = false AND c.isAvailable = false "
+            + "AND CONCAT(c.name,' ',c.brand,' ',c.model,' ',c.address) LIKE %:keyword%")
     Page<Car> getListCarActiveByOwnerWithKeyword(
-            @Param("ownerId") Integer ownerId,
-            @Param("keyword") String keyword,
-            Pageable pageable);
+            @Param("ownerId") Integer ownerId, @Param("keyword") String keyword, Pageable pageable);
 
     // Lấy danh sách xe chưa được đặt của owner
-    @Query("SELECT DISTINCT c FROM Car c " +
-            "JOIN FETCH c.carOwner co " +
-            "LEFT JOIN FETCH c.images i " +
-            "WHERE co.id = :ownerId AND c.isStopped = false AND c.isAvailable = true")
+    @Query("SELECT DISTINCT c FROM Car c " + "JOIN FETCH c.carOwner co "
+            + "LEFT JOIN FETCH c.images i "
+            + "WHERE co.id = :ownerId AND c.isStopped = false AND c.isAvailable = true")
     Page<Car> getListCarNotBookedByOwner(@Param("ownerId") Integer ownerId, Pageable pageable);
 
     // Lấy danh sách xe chưa được đặt của owner có tìm kiếm theo keyword
-    @Query("SELECT DISTINCT c FROM Car c " +
-            "JOIN FETCH c.carOwner co " +
-            "LEFT JOIN FETCH c.images i " +
-            "WHERE co.id = :ownerId AND c.isStopped = false AND c.isAvailable = true " +
-            "AND CONCAT(c.name,' ',c.brand,' ',c.model,' ',c.address) LIKE %:keyword%")
+    @Query("SELECT DISTINCT c FROM Car c " + "JOIN FETCH c.carOwner co "
+            + "LEFT JOIN FETCH c.images i "
+            + "WHERE co.id = :ownerId AND c.isStopped = false AND c.isAvailable = true "
+            + "AND CONCAT(c.name,' ',c.brand,' ',c.model,' ',c.address) LIKE %:keyword%")
     Page<Car> getListCarNotBookedByOwnerWithKeyword(
-            @Param("ownerId") Integer ownerId,
-            @Param("keyword") String keyword,
-            Pageable pageable);
+            @Param("ownerId") Integer ownerId, @Param("keyword") String keyword, Pageable pageable);
 }

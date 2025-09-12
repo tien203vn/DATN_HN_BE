@@ -20,7 +20,7 @@ public interface BookingService {
             MetaRequestDTO requestDTO, Integer userId);
 
     MetaResponse<MetaResponseDTO, List<BookingResponseDTO>> getListBookingForUserManager(
-            MetaRequestDTO requestDTO, Integer userId);
+            BookingFilterDTO requestDTO, Integer userId);
 
 
     MetaResponse<MetaResponseDTO, List<BookingResponseForOwnerDTO>> getListBookingByCarId(
@@ -41,7 +41,10 @@ public interface BookingService {
     Response<String> cancelBooking(Integer userId, Integer bookingId) throws MessagingException;
 
     Response<String> returnCar(Integer userId, Integer bookingId) throws MessagingException;
+
     Response<String> completeReturnCar(ReturnCarRequestDTO dto);
+
     void syncCancelStatus();
+
     void syncCarBookingComplete();
 }

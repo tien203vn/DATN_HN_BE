@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 
 import net.codejava.domain.dto.auth.LoginResponseDTO;
-import net.codejava.domain.dto.booking.BookingResponseDTO;
 import net.codejava.domain.dto.meta.MetaRequestDTO;
 import net.codejava.domain.dto.meta.MetaResponseDTO;
 import net.codejava.domain.dto.user.AddUserRequestDTO;
@@ -22,6 +21,8 @@ public interface UserService {
 
     Response<UserDetailResponseDTO> updateUser(Integer id, UpdUserRequestDTO requestDTO);
 
-    MetaResponse<MetaResponseDTO, List<UserBookingCountDTO>> getListUserBooking(MetaRequestDTO requestDTO, Integer ownerId);
+    MetaResponse<MetaResponseDTO, List<UserBookingCountDTO>> getListUserBooking(
+            MetaRequestDTO requestDTO, Integer ownerId);
+
     Response<Map<String, String>> getMyWallet(Integer userId);
 }
