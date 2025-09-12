@@ -9,6 +9,8 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import java.util.List;
 import net.codejava.domain.entity.Booking;
+import net.codejava.domain.enums.BookingStatus;
+import java.time.LocalDateTime;
 
 @Repository
 public interface BookingRepository extends JpaRepository<Booking, Integer> {
@@ -47,4 +49,7 @@ public interface BookingRepository extends JpaRepository<Booking, Integer> {
 
     @Query("SELECT b.user, COUNT(b) FROM Booking b WHERE b.car.carOwner.id = :ownerId AND (:userName IS NULL OR LOWER(b.user.username) LIKE LOWER(CONCAT('%', :userName, '%')))  GROUP BY b.user")
     List<Object[]> getListCustomerWithBookingCountByOwnerId(@Param("ownerId") Integer ownerId,@Param("userName") String userName, Pageable pageable);
+
+    List<Booking> findAllByStatusAndStartDateTimeBefore(BookingStatus status, LocalDateTime time);
+    List<Booking> findAllByStatus(BookingStatus status);
 }

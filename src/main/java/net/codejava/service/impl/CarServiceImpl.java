@@ -248,7 +248,7 @@ public class CarServiceImpl implements CarService {
                 ? Sort.by(field).ascending()
                 : Sort.by(field).descending();
         Pageable pageable = PageRequest.of(metaRequestDTO.currentPage(), metaRequestDTO.pageSize(), sort);
-        Page<Car> page = carRepo.searchCarV2(address, startTime, endTime, pageable);
+        Page<Car> page = carRepo.searchCarV3(address, pageable);
 
         if (page.getContent().isEmpty()) throw new AppException("List car is empty");
         List<CarResponseDTO> li = page.getContent().stream()

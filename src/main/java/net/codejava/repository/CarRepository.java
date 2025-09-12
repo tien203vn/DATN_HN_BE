@@ -52,6 +52,14 @@ public interface CarRepository extends JpaRepository<Car, Integer> {
 
     @Query(
             value =
+                    "SELECT * FROM cars c WHERE c.is_stopped = false AND c.address LIKE %:address% AND c.is_available = true",
+            nativeQuery = true)
+    Page<Car> searchCarV3(
+            @Param("address") String address,
+            Pageable pageable);
+
+    @Query(
+            value =
                     "SELECT * FROM cars c\n"
                             + "WHERE c.car_id = :carId AND c.is_stopped = false AND c.car_id NOT IN (\n"
                             + "\t\t\t\t\tSELECT b.car_id FROM bookings b \n"

@@ -44,7 +44,7 @@ import net.codejava.service.CarService;
 import net.codejava.service.TransactionService;
 import net.codejava.utility.MailSenderUtil;
 import net.codejava.utility.TimeUtil;
-
+import net.codejava.domain.dto.booking.ReturnCarRequestDTO;
 @Service
 @RequiredArgsConstructor
 @EnableTransactionManagement
@@ -183,7 +183,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public Response<BookingDetailResponseDTO> addBooking(Integer customerId, AddBookingRequestDTO requestDTO) {
         // Car
         Optional<Car> findCar = carRepo.findById(requestDTO.carId());
@@ -253,6 +253,9 @@ public class BookingServiceImpl implements BookingService {
                     .user(owner)
                     .build();
             transactionService.addTransaction(ownerTran);
+            //Update isAvailable of Car
+            car.setIsAvailable(false);
+            carRepo.save(car);
             // Send Mail To Owner
             String toMail = owner.getEmail();
             String subject = MailTemplate.RENT_A_CAR.RENT_A_CAR_SUBJECT;
@@ -272,15 +275,26 @@ public class BookingServiceImpl implements BookingService {
         }
     }
 
+//    @Override
+//    @Transactional
+//    public Response<String> confirmPickUpCar( Integer bookingId) {
+//        if (booking.getStatus() == BookingStatus.CONFIRMED) {
+//            booking.setStatus(BookingStatus.PICK_UP);
+//            bookingRepo.save(booking);
+//            return Response.successfulResponse("Khách hàng đã nhận xe thành công.");
+//        } else {
+//            throw new AppException("Trạng thái đơn hàng không cho phép nhận xe.");
+//        }
+//    }
+
     @Override
     public Response<BookingDetailResponseDTO> updateBooking(Integer bookingId, UpdBookingRequestDTO requestDTO) {
         Optional<Booking> oldBooking = bookingRepo.findById(bookingId);
         if (oldBooking.isEmpty()) throw new AppException("This booking is not existed");
 
         // Check status allow to edit
-        if (oldBooking.get().getStatus() == BookingStatus.IN_PROGRESS
-                || oldBooking.get().getStatus() == BookingStatus.CANCELLED
-                || oldBooking.get().getStatus() == BookingStatus.PENDING_PAYMENT
+        if (
+                oldBooking.get().getStatus() == BookingStatus.CANCELLED
                 || oldBooking.get().getStatus() == BookingStatus.COMPLETED)
             throw new AppException("Don't allow to edit this booking");
 
@@ -316,7 +330,9 @@ public class BookingServiceImpl implements BookingService {
                     "startTime", TimeUtil.formatToString(booking.getStartDateTime()),
                     "endTime", TimeUtil.formatToString(booking.getEndDateTime()));
             mailSenderUtil.sendMailWithHTML(toMail, subject, template, variable);
-
+            // update trạng thái car -> not available
+            car.setIsAvailable(false);
+            carRepo.save(car);
             return Response.successfulResponse("Confirm deposit successfully");
         } else throw new AppException("The status of this booking does not allow to confirm deposit");
     }
@@ -495,10 +511,98 @@ public class BookingServiceImpl implements BookingService {
         return Response.successfulResponse(message);
     }
 
+    //Hàm được gọi khi chủ xe xác nhận đã kiểm tra xe và hoàn tất việc trả xe
+    @Transactional
+    public Response<String> completeReturnCar(ReturnCarRequestDTO dto) {
+        Optional<Booking> findBooking = bookingRepo.findById(dto.getBookingId());
+        if (findBooking.isEmpty()) throw new AppException("Booking không tồn tại");
+        Booking booking = findBooking.get();
+
+        if (booking.getStatus() != BookingStatus.PICK_UP)
+            throw new AppException("Trạng thái booking không cho phép trả xe");
+
+        booking.setLateMinute(dto.getLateMinute() != null ? dto.getLateMinute() : 0);
+
+        long numberOfHour = booking.getNumberOfHour();
+        double extraFee = 0;
+        if (dto.getLateMinute() != null && dto.getLateMinute() > 0 && numberOfHour > 0) {
+            double hourlyRate = booking.getTotal() / numberOfHour;
+            extraFee = Math.ceil(dto.getLateMinute() / 60.0) * hourlyRate * 2;
+        }
+        booking.setExtraFee(extraFee);
+
+        if (dto.getNote() != null && !dto.getNote().isEmpty()) {
+            booking.setNote(dto.getNote());
+            booking.setCompensationFee(dto.getCompensationFee() != null ? dto.getCompensationFee() : 0);
+        } else {
+            booking.setNote(null);
+            booking.setCompensationFee(0.0);
+        }
+
+        booking.setStatus(BookingStatus.COMPLETED);
+
+        Car car = booking.getCar();
+        car.setIsStopped(true);
+        carRepo.save(car);
+        bookingRepo.save(booking);
+
+        return Response.successfulResponse("Trả xe và kiểm tra xe thành công.");
+    }
+
 
     //logic job
-    public void syncStatus() {
-        // Thay bằng logic thật để join dữ liệu từ bảng booking & car
-        System.out.println("[SYNC] Đồng bộ booking-car tại ");
+
+    /**
+     * Quét nếu quá thời gian đặt mà chưa confirm thì chuyển trạng thái hủy và -> available
+     */
+    @Transactional
+    public void syncCancelStatus() {
+        LocalDateTime now = LocalDateTime.now();
+//        // Quét các booking PENDING_DEPOSIT quá hạn
+//        List<Booking> pendingBookings = bookingRepo.findAllByStatusAndStartDateTimeBefore(BookingStatus.CONFIRMED, now);
+//        for (Booking booking : pendingBookings) {
+//            booking.setStatus(BookingStatus.CANCELLED);
+//            Car car = booking.getCar();
+//            car.setIsAvailable(true);
+//            carRepo.save(car);
+//            bookingRepo.save(booking);
+//        }
+
+        // Quét các booking CONFIRMED quá hạn 30 phút chưa nhận xe
+        List<Booking> confirmedBookings = bookingRepo.findAllByStatus(BookingStatus.CONFIRMED);
+        for (Booking booking : confirmedBookings) {
+            LocalDateTime pickUpDeadline = booking.getStartDateTime().plusMinutes(30);
+            if (now.isAfter(pickUpDeadline)) {
+                booking.setStatus(BookingStatus.CANCELLED);
+                Car car = booking.getCar();
+                car.setIsAvailable(true);
+                carRepo.save(car);
+                bookingRepo.save(booking);
+
+                // Gửi mail cho chủ xe
+                String toMail = car.getCarOwner().getEmail();
+                String subject = "Thông báo huỷ đơn đặt xe";
+                String template = MailTemplate.CANCEL_BOOKING.CANCEL_BOOKING_TEMPLATE;
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+                String cancelTime = now.format(formatter);
+                Map<String, Object> variable = Map.of(
+                        "carName", car.getName(),
+                        "cancelTime", cancelTime
+                );
+                try {
+                    mailSenderUtil.sendMailWithHTML(toMail, subject, template, variable);
+                } catch (jakarta.mail.MessagingException e) {
+                    System.err.println("Gửi mail thất bại: " + e.getMessage());
+                }
+            }
+        }
+        System.out.println("[SYNC] Đã đồng bộ trạng thái booking bị huỷ do quá hạn nhận xe tại " + now);
+    }
+
+    /**
+     * * Neu thời gian trả quá hạn thì chuyển trạng thái hoàn thành và -> not available, isactive -> not active
+     */
+    public void syncCarBookingComplete(){
+        System.out.println("[SYNC] Đồng bộ car-booking tại ");
     }
 }

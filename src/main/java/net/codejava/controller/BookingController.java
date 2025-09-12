@@ -119,4 +119,9 @@ public class BookingController {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(bookingService.returnCar(AuthUtil.getRequestedUser().getId(), bookingId));
     }
+
+    @PostMapping("/return-car-complete")
+    public ResponseEntity<String> completeReturnCar(@RequestBody ReturnCarRequestDTO dto) {
+        return ResponseEntity.ok(bookingService.completeReturnCar(dto).getMessage());
+    }
 }

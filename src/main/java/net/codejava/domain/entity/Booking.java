@@ -32,6 +32,22 @@ public class Booking {
     @DateTimeFormat(pattern = TimeFormatConstant.DATETIME_FORMAT)
     private LocalDateTime endDateTime;
 
+    //Để note lại xe có vấn đề gì không
+    @Column(name = "note", columnDefinition = "TEXT")
+    private String note;
+
+    //Trường số phút muộn
+    @Column(name = "late_minute")
+    private Integer lateMinute;
+
+    //Trường số tiền phải trả thêm nếu trả muộn
+    @Column(name = "extra_fee")
+    private Double extraFee;
+
+    // Số tiền phải đền nếu xe bị hỏng
+    @Column(name = "compensation_fee")
+    private Double compensationFee;
+
     @Transient
     @Setter(AccessLevel.NONE)
     private Double total;

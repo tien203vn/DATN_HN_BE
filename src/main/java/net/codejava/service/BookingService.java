@@ -41,6 +41,7 @@ public interface BookingService {
     Response<String> cancelBooking(Integer userId, Integer bookingId) throws MessagingException;
 
     Response<String> returnCar(Integer userId, Integer bookingId) throws MessagingException;
-
-    void syncStatus();
+    Response<String> completeReturnCar(ReturnCarRequestDTO dto);
+    void syncCancelStatus();
+    void syncCarBookingComplete();
 }

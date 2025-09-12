@@ -87,7 +87,7 @@ public class BookingMapperImpl implements BookingMapper {
                 .startDateTime(TimeUtil.convertToDateTime(requestDTO.startDateTime()))
                 .endDateTime(TimeUtil.convertToDateTime(requestDTO.endDateTime()))
                 .paymentMethod(requestDTO.paymentMethod())
-                .status(BookingStatus.PENDING_DEPOSIT)
+                .status(BookingStatus.CONFIRMED)
                 .userInfors(new ArrayList<>())
                 .feedback(null)
                 .build();
