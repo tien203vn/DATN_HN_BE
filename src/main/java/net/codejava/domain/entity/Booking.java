@@ -48,6 +48,10 @@ public class Booking {
     @Column(name = "compensation_fee")
     private Double compensationFee;
 
+    //Số tiền cho thuê
+    @Column(name = "rental_amount")
+    private Double rental_amount;
+
     @Transient
     @Setter(AccessLevel.NONE)
     private Double total;

@@ -22,6 +22,9 @@ public interface CarService {
     MetaResponse<MetaResponseDTO, List<CarResponseDTO>> getListCarNotBookedByOwner(
             MetaRequestDTO metaRequestDTO, Integer ownerId);
 
+    MetaResponse<MetaResponseDTO, List<CarResponseDTO>> getListCarStopByOwner(
+            MetaRequestDTO metaRequestDTO, Integer ownerId);
+
     Response<CarDetailResponseDTO> getCarDetail(Integer id);
 
     Response<CarDetailResponseForOwnerDTO> getCarDetailForOwner(Integer id);

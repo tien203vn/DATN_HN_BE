@@ -1,6 +1,7 @@
 package net.codejava.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -107,12 +108,12 @@ public class BookingController {
         //        }
     }
 
-    @PatchMapping(Endpoint.V1.Booking.CANCELLED_BOOKING)
-    public ResponseEntity<Response<String>> cancelBooking(@PathVariable(name = "id") Integer bookingId)
-            throws MessagingException {
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(bookingService.cancelBooking(AuthUtil.getRequestedUser().getId(), bookingId));
-    }
+//    @PatchMapping(Endpoint.V1.Booking.CANCELLED_BOOKING)
+//    public ResponseEntity<Response<String>> cancelBooking(@PathVariable(name = "id") Integer bookingId)
+//            throws MessagingException {
+//        return ResponseEntity.status(HttpStatus.OK)
+//                .body(bookingService.cancelBooking(AuthUtil.getRequestedUser().getId(), bookingId));
+//    }
 
     @PatchMapping(Endpoint.V1.Booking.RETURN_CAR)
     public ResponseEntity<Response<String>> returnCar(@PathVariable(name = "id") Integer bookingId)
@@ -124,5 +125,28 @@ public class BookingController {
     @PostMapping("/return-car-complete")
     public ResponseEntity<String> completeReturnCar(@RequestBody ReturnCarRequestDTO dto) {
         return ResponseEntity.ok(bookingService.completeReturnCar(dto).getMessage());
+    }
+
+    @PatchMapping("/api/v1/booking/confirm-booking/{id}")
+    public Response<String> confirmBooking(@PathVariable("id") Integer bookingId) {
+        return bookingService.confirmBooking(bookingId);
+    }
+
+    @PatchMapping("/api/v1/booking/cancel/{id}")
+    public ResponseEntity<Response<String>> cancelBooking(@PathVariable("id") Integer bookingId) throws MessagingException {
+//        Integer userId = AuthUtil.getRequestedUser().getId();
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(bookingService.cancelBooking( bookingId));
+    }
+
+    @PostMapping("/api/v1/booking/complete/{id}")
+    public ResponseEntity<Response<String>> completeBooking(
+            @PathVariable("id") Integer bookingId,
+            @RequestBody Map<String, Object> payload) {
+        String note = (String) payload.get("note");
+        Integer lateMinutes = (Integer) payload.get("lateMinutes");
+        Double compensationFee = ((Number) payload.get("compensationFee")).doubleValue();
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(bookingService.completeBooking(bookingId, note, lateMinutes, compensationFee));
     }
 }

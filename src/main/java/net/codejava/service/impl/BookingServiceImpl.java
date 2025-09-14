@@ -200,6 +200,13 @@ public class BookingServiceImpl implements BookingService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Response<BookingDetailResponseDTO> addBooking(Integer customerId, AddBookingRequestDTO requestDTO) {
+        // Định dạng DateTimeFormatter
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+
+        // Chuyển đổi startDateTime và endDateTime từ String sang LocalDateTime
+        LocalDateTime startDateTime = LocalDateTime.parse(requestDTO.startDateTime(), formatter);
+        LocalDateTime endDateTime = LocalDateTime.parse(requestDTO.endDateTime(), formatter);
+
         // Car
         Optional<Car> findCar = carRepo.findById(requestDTO.carId());
         if (findCar.isEmpty()) throw new AppException("This car is not existed");
@@ -229,6 +236,14 @@ public class BookingServiceImpl implements BookingService {
         Booking newBooking = bookingMapper.addBookingRequestToBookingEntity(requestDTO);
         newBooking.setCar(car);
         newBooking.setUser(customer);
+        newBooking.setStartDateTime(startDateTime);
+        newBooking.setEndDateTime(endDateTime);
+
+        // **Tính tiền thuê xe và gán vào cột rental_amount**
+        long hours = TimeUtil.getHoursDifference(startDateTime, endDateTime);
+        double rentalAmount = hours * car.getBasePrice();
+        newBooking.setRental_amount(rentalAmount);
+
         // Add Renter and Driver
         UserInfor renter = requestDTO.userInfors()[0];
         newBooking.addUserInfor(renter);
@@ -276,8 +291,8 @@ public class BookingServiceImpl implements BookingService {
             String subject = MailTemplate.RENT_A_CAR.RENT_A_CAR_SUBJECT;
             String template = MailTemplate.RENT_A_CAR.RENT_A_CAR_TEMPLATE;
             LocalDateTime now = LocalDateTime.now();
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
-            String bookingTime = now.format(formatter).toString();
+            DateTimeFormatter mailFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+            String bookingTime = now.format(mailFormatter).toString();
             Map<String, Object> variable = Map.of(
                     "carName", car.getName(),
                     "bookingTime", bookingTime,
@@ -289,7 +304,6 @@ public class BookingServiceImpl implements BookingService {
             throw new AppException("Add a new booking fail");
         }
     }
-
     //    @Override
     //    @Transactional
     //    public Response<String> confirmPickUpCar( Integer bookingId) {
@@ -395,59 +409,35 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional
-    public Response<String> cancelBooking(Integer userId, Integer bookingId) throws MessagingException {
-        Booking booking = this.verifyBookingCustomer(userId, bookingId);
-        // Car
-        Optional<Car> findCar = carRepo.findById(booking.getCar().getId());
-        if (findCar.isEmpty()) throw new AppException("This car is not existed");
-        Car car = findCar.get();
-        // Owner
-        User owner = car.getCarOwner();
-        // Customer
-        Optional<User> findCustomer = userRepo.findById(booking.getUser().getId());
-        if (findCustomer.isEmpty()) throw new AppException("This user is not existed");
-        User customer = findCustomer.get();
+    public Response<String> cancelBooking( Integer bookingId) throws MessagingException {
+//        Booking booking = this.verifyBookingCustomer(userId, bookingId);
+        Booking booking = bookingRepo.findById(bookingId)
+                .orElseThrow(() -> new AppException("This booking is not existed"));
 
-        if (booking.getStatus() == BookingStatus.CONFIRMED || booking.getStatus() == BookingStatus.PENDING_DEPOSIT) {
-            // Set booking status
-            booking.setStatus(BookingStatus.CANCELLED);
-            bookingRepo.save(booking);
-            // Return Deposit and Transaction
-            // Owner
-            if (owner.getWallet() < car.getDeposit())
-                throw new AppException("Cancel booking fail. The car owner's wallet has no money");
-            owner.setWallet(owner.getWallet() - car.getDeposit());
-            User saveOwner = userRepo.save(owner);
-            AddSystemTransactionRequestDTO ownerTran = AddSystemTransactionRequestDTO.builder()
-                    .amount(-car.getDeposit())
-                    .transactionType(TransactionType.REFUND_DEPOSIT)
-                    .bookingId(booking.getId())
-                    .carName(car.getName())
-                    .user(saveOwner)
-                    .build();
-            transactionService.addTransaction(ownerTran);
-            // Customer
-            customer.setWallet(customer.getWallet() + car.getDeposit());
-            User saveCustomer = userRepo.save(customer);
-            AddSystemTransactionRequestDTO customerTran = AddSystemTransactionRequestDTO.builder()
-                    .amount(car.getDeposit())
-                    .transactionType(TransactionType.REFUND_DEPOSIT)
-                    .bookingId(booking.getId())
-                    .carName(car.getName())
-                    .user(saveCustomer)
-                    .build();
-            transactionService.addTransaction(customerTran);
-            // Send Mail To Owner
-            String toMail = owner.getEmail();
-            String subject = MailTemplate.CANCEL_BOOKING.CANCEL_BOOKING_SUBJECT;
-            String template = MailTemplate.CANCEL_BOOKING.CANCEL_BOOKING_TEMPLATE;
-            LocalDateTime now = LocalDateTime.now();
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
-            String cancelTime = now.format(formatter).toString();
-            Map<String, Object> variable = Map.of("carName", car.getName(), "cancelTime", cancelTime);
-            mailSenderUtil.sendMailWithHTML(toMail, subject, template, variable);
-            return Response.successfulResponse("Cancel booking successful.");
-        } else throw new AppException("The status of this booking does not allow to cancel");
+        if (booking.getStatus() != BookingStatus.CONFIRMED && booking.getStatus() != BookingStatus.PENDING_DEPOSIT) {
+            throw new AppException("Trạng thái đơn hàng không cho phép hủy.");
+        }
+
+        // Cập nhật trạng thái booking
+        booking.setStatus(BookingStatus.CANCELLED);
+        bookingRepo.save(booking);
+
+        // Cập nhật trạng thái xe
+        Car car = booking.getCar();
+        car.setIsAvailable(true);
+        carRepo.save(car);
+
+        // Gửi email thông báo hủy đơn hàng
+        String toMail = car.getCarOwner().getEmail();
+        String subject = "Thông báo hủy đơn hàng";
+        String template = MailTemplate.CANCEL_BOOKING.CANCEL_BOOKING_TEMPLATE;
+        LocalDateTime now = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+        String cancelTime = now.format(formatter);
+        Map<String, Object> variable = Map.of("carName", car.getName(), "cancelTime", cancelTime);
+        mailSenderUtil.sendMailWithHTML(toMail, subject, template, variable);
+
+        return Response.successfulResponse("Đơn hàng đã được hủy thành công.");
     }
 
     @Override
@@ -615,5 +605,65 @@ public class BookingServiceImpl implements BookingService {
      */
     public void syncCarBookingComplete() {
         System.out.println("[SYNC] Đồng bộ car-booking tại ");
+    }
+
+    @Override
+    @Transactional
+    public Response<String> confirmBooking(Integer bookingId) {
+        Optional<Booking> findBooking = bookingRepo.findById(bookingId);
+        if (findBooking.isEmpty()) {
+            throw new AppException("Booking không tồn tại");
+        }
+
+        Booking booking = findBooking.get();
+        if (booking.getStatus() != BookingStatus.CONFIRMED) {
+            throw new AppException("Trạng thái booking không cho phép chuyển sang PICK_UP");
+        }
+
+        booking.setStatus(BookingStatus.PICK_UP);
+        bookingRepo.save(booking);
+
+        return Response.successfulResponse("Đơn hàng đã chuyển sang trạng thái PICK_UP thành công.");
+    }
+
+    @Override
+    @Transactional
+    public Response<String> completeBooking(Integer bookingId, String note, Integer lateMinutes, Double compensationFee) {
+        Optional<Booking> findBooking = bookingRepo.findById(bookingId);
+        if (findBooking.isEmpty()) {
+            throw new AppException("Booking không tồn tại");
+        }
+
+        Booking booking = findBooking.get();
+        if (booking.getStatus() != BookingStatus.PICK_UP) {
+            throw new AppException("Trạng thái booking không cho phép chuyển sang COMPLETED");
+        }
+
+        // Tính tiền phạt dựa trên số phút muộn
+        double extraFee = 0.0;
+        if (lateMinutes != null && lateMinutes > 0) {
+            long numberOfHours = booking.getNumberOfHour();
+            if (numberOfHours > 0) {
+                double hourlyRate = booking.getTotal() / numberOfHours;
+                extraFee = Math.ceil(lateMinutes / 60.0) * hourlyRate * 2;
+            }
+        }
+
+        // Cập nhật thông tin booking
+        booking.setNote(note);
+        booking.setLateMinute(lateMinutes != null ? lateMinutes : 0);
+        booking.setCompensationFee(compensationFee != null ? compensationFee : 0.0);
+        booking.setExtraFee(extraFee);
+        booking.setStatus(BookingStatus.COMPLETED);
+
+        // Cập nhật trạng thái xe
+        Car car = booking.getCar();
+        car.setIsAvailable(false);
+        car.setIsStopped(true);
+        carRepo.save(car);
+
+        bookingRepo.save(booking);
+
+        return Response.successfulResponse("Đơn hàng đã chuyển sang trạng thái COMPLETED thành công.");
     }
 }

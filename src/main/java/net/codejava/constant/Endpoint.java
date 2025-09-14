@@ -23,7 +23,7 @@ public class Endpoint {
         public static final class Car {
             public static final String BASE = PREFIX + "/car";
             public static final String GET_LIST_FOR_OWNER = BASE + "/my-car";
-            public static final String GET_LIST_ACTIVE_FOR_OWNER = BASE + "/my-car-active";
+            public static final String GET_LIST_CONFIRM_FOR_OWNER = BASE + "/car-confirm";
             public static final String GET_LIST_IN_ACTIVE_FOR_OWNER = BASE + "/my-car-in-active";
             public static final String GET_DETAIL = BASE + "/{id}";
             public static final String GET_DETAIL_FOR_OWNER = BASE + "/owner/{id}";

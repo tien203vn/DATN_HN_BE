@@ -38,7 +38,7 @@ public interface BookingService {
 
     Response<String> confirmPayment(Integer userId, Integer bookingId);
 
-    Response<String> cancelBooking(Integer userId, Integer bookingId) throws MessagingException;
+    Response<String> cancelBooking(Integer bookingId) throws MessagingException;
 
     Response<String> returnCar(Integer userId, Integer bookingId) throws MessagingException;
 
@@ -47,4 +47,8 @@ public interface BookingService {
     void syncCancelStatus();
 
     void syncCarBookingComplete();
+
+    Response<String> confirmBooking(Integer bookingId);
+
+    Response<String> completeBooking(Integer bookingId, String note, Integer lateMinutes, Double compensationFee);
 }

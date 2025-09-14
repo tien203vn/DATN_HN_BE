@@ -67,7 +67,7 @@ public class CarServiceImpl implements CarService {
         Pageable pageable = PageRequest.of(metaRequestDTO.currentPage(), metaRequestDTO.pageSize(), sort);
         Page<Car> page = metaRequestDTO.keyword() == null
                 ? carRepo.getListCarByOwner(ownerId, pageable)
-                : carRepo.getListCarByOwnerWithKeyword(ownerId, metaRequestDTO.keyword(), pageable);
+                : carRepo.getListCarByOwnerWithKeyword(ownerId, metaRequestDTO.keyword().equals("0") ? false : true, pageable);
         if (page.getContent().isEmpty()) throw new AppException("List car is empty");
         List<CarResponseDTO> li = page.getContent().stream()
                 .map(temp -> carMapper.toCarResponseDTO(temp))
@@ -130,6 +130,36 @@ public class CarServiceImpl implements CarService {
         Page<Car> page = metaRequestDTO.keyword() == null
                 ? carRepo.getListCarNotBookedByOwner(ownerId, pageable)
                 : carRepo.getListCarNotBookedByOwnerWithKeyword(ownerId, metaRequestDTO.keyword(), pageable);
+        if (page.getContent().isEmpty()) throw new AppException("List car is empty");
+        List<CarResponseDTO> li = page.getContent().stream()
+                .map(temp -> carMapper.toCarResponseDTO(temp))
+                .toList();
+        return MetaResponse.successfulResponse(
+                "Get list car not booked success",
+                MetaResponseDTO.builder()
+                        .totalItems((int) page.getTotalElements())
+                        .totalPages(page.getTotalPages())
+                        .currentPage(metaRequestDTO.currentPage())
+                        .pageSize(metaRequestDTO.pageSize())
+                        .sorting(SortingDTO.builder()
+                                .sortField(metaRequestDTO.sortField())
+                                .sortDir(metaRequestDTO.sortDir())
+                                .build())
+                        .build(),
+                li);
+    }
+
+    @Override
+    public MetaResponse<MetaResponseDTO, List<CarResponseDTO>> getListCarStopByOwner(MetaRequestDTO metaRequestDTO, Integer ownerId) {
+        Optional<User> findUser = userRepo.findById(ownerId);
+        if (findUser.isEmpty()) throw new AppException("This owner is not existed");
+        Sort sort = metaRequestDTO.sortDir().equals(MetaConstant.Sorting.DEFAULT_DIRECTION)
+                ? Sort.by(metaRequestDTO.sortField()).ascending()
+                : Sort.by(metaRequestDTO.sortField()).descending();
+        Pageable pageable = PageRequest.of(metaRequestDTO.currentPage(), metaRequestDTO.pageSize(), sort);
+        Page<Car> page = metaRequestDTO.keyword() == null
+                ? carRepo.getListCarStopByOwner(ownerId, pageable)
+                : carRepo.getListCarStopOwnerWithKeyword(ownerId, metaRequestDTO.keyword(), pageable);
         if (page.getContent().isEmpty()) throw new AppException("List car is empty");
         List<CarResponseDTO> li = page.getContent().stream()
                 .map(temp -> carMapper.toCarResponseDTO(temp))
@@ -217,7 +247,8 @@ public class CarServiceImpl implements CarService {
         Car car = findCar.get();
         String message = "Stop renting a car successful";
         if (car.getIsStopped()) message = "Re-renting a car successful";
-        findCar.get().setIsStopped(!findCar.get().getIsStopped());
+        car.setIsStopped(false);
+        car.setIsAvailable(true);
         carRepo.save(findCar.get());
         return Response.successfulResponse(message);
     }

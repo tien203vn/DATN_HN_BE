@@ -21,9 +21,9 @@ public interface CarRepository extends JpaRepository<Car, Integer> {
     @Query("SELECT DISTINCT c FROM Car c " + "JOIN FETCH c.carOwner co "
             + "LEFT JOIN FETCH c.images i "
             + "WHERE co.id = :ownerId "
-            + "AND CONCAT(c.name,' ',c.brand,' ',c.model,' ',c.address) LIKE %:keyword%")
+            + "AND c.isAvailable = :keyword")
     Page<Car> getListCarByOwnerWithKeyword(
-            @Param("ownerId") Integer ownerId, @Param("keyword") String keyword, Pageable pageable);
+            @Param("ownerId") Integer ownerId, @Param("keyword") boolean keyword, Pageable pageable);
 
     @Query("SELECT c FROM Car c " + "INNER JOIN Image i ON c.id = i.id " + "WHERE c.id = :id")
     Optional<Car> findByIdWithImage(@Param("id") Integer id);
@@ -95,5 +95,18 @@ public interface CarRepository extends JpaRepository<Car, Integer> {
             + "WHERE co.id = :ownerId AND c.isStopped = false AND c.isAvailable = true "
             + "AND CONCAT(c.name,' ',c.brand,' ',c.model,' ',c.address) LIKE %:keyword%")
     Page<Car> getListCarNotBookedByOwnerWithKeyword(
+            @Param("ownerId") Integer ownerId, @Param("keyword") String keyword, Pageable pageable);
+
+
+    @Query("SELECT DISTINCT c FROM Car c " + "JOIN FETCH c.carOwner co "
+            + "LEFT JOIN FETCH c.images i "
+            + "WHERE co.id = :ownerId AND c.isStopped = true")
+    Page<Car> getListCarStopByOwner(@Param("ownerId") Integer ownerId, Pageable pageable);
+
+    @Query("SELECT DISTINCT c FROM Car c " + "JOIN FETCH c.carOwner co "
+            + "LEFT JOIN FETCH c.images i "
+            + "WHERE co.id = :ownerId AND c.isStopped = true "
+            + "AND CONCAT(c.name,' ',c.brand,' ',c.model,' ',c.address) LIKE %:keyword%")
+    Page<Car> getListCarStopOwnerWithKeyword(
             @Param("ownerId") Integer ownerId, @Param("keyword") String keyword, Pageable pageable);
 }

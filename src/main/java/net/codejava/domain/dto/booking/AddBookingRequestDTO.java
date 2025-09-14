@@ -16,7 +16,7 @@ public record AddBookingRequestDTO(
         UserInfor[] userInfors,
         PaymentMethod paymentMethod,
         @NotBlank(message = "The start rental time is not blank")
-                @AfterNowTime(message = "The start rental time is after now")
+//                @AfterNowTime(message = "The start rental time is after now")
                 @JsonFormat(pattern = TimeFormatConstant.DATETIME_FORMAT)
                 String startDateTime,
         @NotBlank(message = "The end rental time is not blank")

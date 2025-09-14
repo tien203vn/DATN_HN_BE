@@ -41,7 +41,7 @@ public class CarController {
         return ResponseEntity.status(HttpStatus.OK).body(carService.getListCarByOwner(requestDTO, ownerId));
     }
 
-    @GetMapping(Endpoint.V1.Car.GET_LIST_ACTIVE_FOR_OWNER)
+    @GetMapping(Endpoint.V1.Car.GET_LIST_CONFIRM_FOR_OWNER)
     public ResponseEntity<MetaResponse<MetaResponseDTO, List<CarResponseDTO>>> getListCarActiveForOwner(
             HttpServletRequest servletRequest, @ParameterObject MetaRequestDTO requestDTO) {
         Integer ownerId =
@@ -54,7 +54,7 @@ public class CarController {
             HttpServletRequest servletRequest, @ParameterObject MetaRequestDTO requestDTO) {
         Integer ownerId =
                 Integer.valueOf(jwtTokenUtil.getAccountId(servletRequest.getHeader(HttpHeaders.AUTHORIZATION)));
-        return ResponseEntity.status(HttpStatus.OK).body(carService.getListCarNotBookedByOwner(requestDTO, ownerId));
+        return ResponseEntity.status(HttpStatus.OK).body(carService.getListCarStopByOwner(requestDTO, ownerId));
     }
 
     @GetMapping(Endpoint.V1.Car.GET_DETAIL)
