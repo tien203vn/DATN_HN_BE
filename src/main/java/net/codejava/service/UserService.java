@@ -25,4 +25,7 @@ public interface UserService {
             MetaRequestDTO requestDTO, Integer ownerId);
 
     Response<Map<String, String>> getMyWallet(Integer userId);
+
+    MetaResponse<MetaResponseDTO, List<UserBookingCountDTO>> getListUserWithPickupOrConfirmOrders(
+            MetaRequestDTO requestDTO, Integer ownerId);
 }

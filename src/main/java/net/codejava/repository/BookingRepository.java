@@ -68,4 +68,53 @@ public interface BookingRepository extends JpaRepository<Booking, Integer> {
             @Param("endDateTime") LocalDateTime endDateTime,
             Pageable pageable
     );
+
+    @Query("SELECT MONTH(b.startDateTime) AS month, COUNT(b) AS totalBookings " +
+            "FROM Booking b " +
+            "WHERE YEAR(b.startDateTime) = :year AND b.car.carOwner.id = :userId " +
+            "GROUP BY MONTH(b.startDateTime) " +
+            "ORDER BY MONTH(b.startDateTime)")
+    List<Object[]> countBookingsByMonth(@Param("year") int year, @Param("userId") Integer userId);
+
+
+    @Query("SELECT MONTH(b.startDateTime) AS month, COUNT(b) AS count " +
+            "FROM Booking b " +
+            "WHERE YEAR(b.startDateTime) = :year AND b.user.id = :userId " +
+            "GROUP BY MONTH(b.startDateTime)")
+    List<Object[]> countBookingsByMonthForUser(@Param("year") int year, @Param("userId") Integer userId);
+
+    @Query("SELECT MONTH(b.startDateTime) AS month, COUNT(DISTINCT b.car.id) AS totalProducts " +
+           "FROM Booking b " +
+           "WHERE YEAR(b.startDateTime) = :year AND b.car.carOwner.id = :userId " +
+           "GROUP BY MONTH(b.startDateTime) " +
+           "ORDER BY MONTH(b.startDateTime)")
+    List<Object[]> countProductsByMonthForOwner(@Param("year") int year, @Param("userId") Integer userId);
+
+    @Query("SELECT MONTH(b.startDateTime) AS month, COUNT(DISTINCT b.user.id) AS totalCustomers " +
+           "FROM Booking b " +
+           "WHERE YEAR(b.startDateTime) = :year AND b.car.carOwner.id = :userId " +
+           "GROUP BY MONTH(b.startDateTime) " +
+           "ORDER BY MONTH(b.startDateTime)")
+    List<Object[]> countCustomersByMonthForOwner(@Param("year") int year, @Param("userId") Integer userId);
+
+    @Query("SELECT MONTH(b.startDateTime) AS month, SUM(TIMESTAMPDIFF(HOUR, b.startDateTime, b.endDateTime)) AS totalHours " +
+           "FROM Booking b " +
+           "WHERE YEAR(b.startDateTime) = :year AND b.car.carOwner.id = :userId " +
+           "GROUP BY MONTH(b.startDateTime) " +
+           "ORDER BY MONTH(b.startDateTime)")
+    List<Object[]> countHoursByMonthForOwner(@Param("year") int year, @Param("userId") Integer userId);
+
+    @Query("SELECT MONTH(b.startDateTime) AS month, b.status AS status, COUNT(b) AS count " +
+           "FROM Booking b " +
+           "WHERE YEAR(b.startDateTime) = :year AND b.car.carOwner.id = :userId " +
+           "GROUP BY MONTH(b.startDateTime), b.status " +
+           "ORDER BY MONTH(b.startDateTime), b.status")
+    List<Object[]> countBookingsByStatusAndMonthForOwner(@Param("year") int year, @Param("userId") Integer userId);
+
+    @Query("SELECT b.user, COUNT(b) " +
+           "FROM Booking b " +
+           "WHERE b.car.carOwner.id = :ownerId AND (b.status = 'PICK_UP' OR b.status = 'CONFIRM') " +
+           "GROUP BY b.user " +
+           "ORDER BY COUNT(b) DESC")
+    List<Object[]> getListCustomerWithPickupOrConfirmOrders(@Param("ownerId") Integer ownerId, Pageable pageable);
 }

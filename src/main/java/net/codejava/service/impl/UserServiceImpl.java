@@ -153,4 +153,33 @@ public class UserServiceImpl implements UserService {
                 Map.ofEntries(Map.entry("wallet", findUser.get().getWallet().toString()));
         return Response.successfulResponse("Get your wallet successful", res);
     }
+
+    @Override
+    public MetaResponse<MetaResponseDTO, List<UserBookingCountDTO>> getListUserWithPickupOrConfirmOrders(
+            MetaRequestDTO requestDTO, Integer ownerId) {
+        Pageable pageable = PageRequest.of(requestDTO.currentPage(), requestDTO.pageSize());
+        List<Object[]> results = bookingRepo.getListCustomerWithPickupOrConfirmOrders(ownerId, pageable);
+
+        if (results.isEmpty()) throw new AppException("Danh sách khách hàng trống");
+
+        List<UserBookingCountDTO> li = results.stream()
+                .map(obj -> UserBookingCountDTO.builder()
+                        .user(userMapper.toUserDetailResponseDTO((User) obj[0]))
+                        .bookingCount((Long) obj[1])
+                        .build())
+                .toList();
+
+        MetaResponseDTO meta = MetaResponseDTO.builder()
+                .totalItems(li.size())
+                .totalPages(1)
+                .currentPage(requestDTO.currentPage())
+                .pageSize(requestDTO.pageSize())
+                .sorting(net.codejava.domain.dto.meta.SortingDTO.builder()
+                        .sortField(requestDTO.sortField())
+                        .sortDir(requestDTO.sortDir())
+                        .build())
+                .build();
+
+        return MetaResponse.successfulResponse("Lấy danh sách khách hàng thành công", meta, li);
+    }
 }

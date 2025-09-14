@@ -2,6 +2,8 @@ package net.codejava.service.impl;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -409,21 +411,28 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional
-    public Response<String> cancelBooking( Integer bookingId) throws MessagingException {
-//        Booking booking = this.verifyBookingCustomer(userId, bookingId);
+    public Response<String> cancelBooking(Integer bookingId) throws MessagingException {
+        // Lấy thông tin booking
         Booking booking = bookingRepo.findById(bookingId)
                 .orElseThrow(() -> new AppException("This booking is not existed"));
 
+        // Kiểm tra trạng thái booking
         if (booking.getStatus() != BookingStatus.CONFIRMED && booking.getStatus() != BookingStatus.PENDING_DEPOSIT) {
             throw new AppException("Trạng thái đơn hàng không cho phép hủy.");
         }
+
+        // Hoàn tiền vào ví của khách hàng
+        User customer = booking.getUser();
+        Car car = booking.getCar();
+        double deposit = car.getDeposit();
+        customer.setWallet(customer.getWallet() + deposit);
+        userRepo.save(customer);
 
         // Cập nhật trạng thái booking
         booking.setStatus(BookingStatus.CANCELLED);
         bookingRepo.save(booking);
 
         // Cập nhật trạng thái xe
-        Car car = booking.getCar();
         car.setIsAvailable(true);
         carRepo.save(car);
 
@@ -437,7 +446,7 @@ public class BookingServiceImpl implements BookingService {
         Map<String, Object> variable = Map.of("carName", car.getName(), "cancelTime", cancelTime);
         mailSenderUtil.sendMailWithHTML(toMail, subject, template, variable);
 
-        return Response.successfulResponse("Đơn hàng đã được hủy thành công.");
+        return Response.successfulResponse("Đơn hàng đã được hủy thành công và tiền đặt cọc đã được hoàn vào ví.");
     }
 
     @Override
@@ -666,4 +675,116 @@ public class BookingServiceImpl implements BookingService {
 
         return Response.successfulResponse("Đơn hàng đã chuyển sang trạng thái COMPLETED thành công.");
     }
+
+    @Override
+    public Response<Map<Integer, Long>> getMonthlyBookingSummary(Integer userId) {
+        int currentYear = LocalDateTime.now().getYear();
+        List<Object[]> results = bookingRepo.countBookingsByMonth(currentYear, userId);
+
+        // Khởi tạo Map với 12 tháng, giá trị mặc định là 0
+        Map<Integer, Long> monthlySummary = new HashMap<>();
+        for (int month = 1; month <= 12; month++) {
+            monthlySummary.put(month, 0L);
+        }
+
+        // Ghi đè giá trị cho các tháng có dữ liệu
+        for (Object[] result : results) {
+            Integer month = (Integer) result[0];
+            Long count = (Long) result[1];
+            monthlySummary.put(month, count);
+        }
+
+        return Response.successfulResponse("Lấy tổng số đơn hàng theo từng tháng thành công.", monthlySummary);
+    }
+
+    @Override
+    public Response<Map<Integer, Long>> getMonthlyProductSummary(Integer userId) {
+        int currentYear = LocalDateTime.now().getYear();
+        List<Object[]> results = bookingRepo.countProductsByMonthForOwner(currentYear, userId);
+
+        // Khởi tạo Map với 12 tháng, giá trị mặc định là 0
+        Map<Integer, Long> monthlySummary = new HashMap<>();
+        for (int month = 1; month <= 12; month++) {
+            monthlySummary.put(month, 0L);
+        }
+
+        // Ghi đè giá trị cho các tháng có dữ liệu
+        for (Object[] result : results) {
+            Integer month = (Integer) result[0];
+            Long count = (Long) result[1];
+            monthlySummary.put(month, count);
+        }
+
+        return Response.successfulResponse("Lấy tổng số sản phẩm cho thuê theo từng tháng thành công.", monthlySummary);
+    }
+
+    @Override
+    public Response<Map<Integer, Long>> getMonthlyCustomerSummary(Integer userId) {
+        int currentYear = LocalDateTime.now().getYear();
+        List<Object[]> results = bookingRepo.countCustomersByMonthForOwner(currentYear, userId);
+
+        // Khởi tạo Map với 12 tháng, giá trị mặc định là 0
+        Map<Integer, Long> monthlySummary = new HashMap<>();
+        for (int month = 1; month <= 12; month++) {
+            monthlySummary.put(month, 0L);
+        }
+
+        // Ghi đè giá trị cho các tháng có dữ liệu
+        for (Object[] result : results) {
+            Integer month = (Integer) result[0];
+            Long count = (Long) result[1];
+            monthlySummary.put(month, count);
+        }
+
+        return Response.successfulResponse("Lấy tổng số người dùng đã thuê xe theo từng tháng thành công.", monthlySummary);
+    }
+
+    @Override
+    public Response<Map<Integer, Long>> getMonthlyHoursSummary(Integer userId) {
+        int currentYear = LocalDateTime.now().getYear();
+        List<Object[]> results = bookingRepo.countHoursByMonthForOwner(currentYear, userId);
+
+        // Khởi tạo Map với 12 tháng, giá trị mặc định là 0
+        Map<Integer, Long> monthlySummary = new HashMap<>();
+        for (int month = 1; month <= 12; month++) {
+            monthlySummary.put(month, 0L);
+        }
+
+        // Ghi đè giá trị cho các tháng có dữ liệu
+        for (Object[] result : results) {
+            Integer month = (Integer) result[0];
+            Long totalHours = (Long) result[1];
+            monthlySummary.put(month, totalHours);
+        }
+
+        return Response.successfulResponse("Lấy tổng số giờ thuê xe theo từng tháng thành công.", monthlySummary);
+    }
+
+    @Override
+    public Response<Map<Integer, List<Map<String, Object>>>> getMonthlyStatusSummary(Integer userId) {
+        int currentYear = LocalDateTime.now().getYear();
+        List<Object[]> results = bookingRepo.countBookingsByStatusAndMonthForOwner(currentYear, userId);
+
+        // Khởi tạo Map với 12 tháng, mỗi tháng là một danh sách trạng thái
+        Map<Integer, List<Map<String, Object>>> monthlyStatusSummary = new HashMap<>();
+        for (int month = 1; month <= 12; month++) {
+            monthlyStatusSummary.put(month, new ArrayList<>());
+        }
+
+        // Ghi đè giá trị cho các tháng có dữ liệu
+        for (Object[] result : results) {
+            Integer month = (Integer) result[0];
+            String status = result[1].toString();
+            Long count = (Long) result[2];
+
+            monthlyStatusSummary.get(month).add(Map.of(
+                    "name", status,
+                    "value", count
+            ));
+        }
+
+        return Response.successfulResponse("Lấy tổng số đơn hàng theo trạng thái và tháng thành công.", monthlyStatusSummary);
+    }
+
+
 }

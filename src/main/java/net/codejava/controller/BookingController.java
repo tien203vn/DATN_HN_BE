@@ -149,4 +149,45 @@ public class BookingController {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(bookingService.completeBooking(bookingId, note, lateMinutes, compensationFee));
     }
+
+    @GetMapping("/api/v1/booking/monthly-summary")
+    public ResponseEntity<Response<Map<Integer, Long>>> getMonthlyBookingSummary( HttpServletRequest servletRequest) {
+        Integer userId =
+                Integer.valueOf(jwtTokenUtil.getAccountId(servletRequest.getHeader(HttpHeaders.AUTHORIZATION)));
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(bookingService.getMonthlyBookingSummary(userId));
+    }
+
+    @GetMapping("/api/v1/booking/monthly-product-summary")
+    public ResponseEntity<Response<Map<Integer, Long>>> getMonthlyProductSummary(HttpServletRequest servletRequest) {
+        Integer userId = Integer.valueOf(jwtTokenUtil.getAccountId(servletRequest.getHeader(HttpHeaders.AUTHORIZATION)));
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(bookingService.getMonthlyProductSummary(userId));
+    }
+
+    @GetMapping("/api/v1/booking/monthly-customer-summary")
+    public ResponseEntity<Response<Map<Integer, Long>>> getMonthlyCustomerSummary(HttpServletRequest servletRequest) {
+        Integer userId = Integer.valueOf(jwtTokenUtil.getAccountId(servletRequest.getHeader(HttpHeaders.AUTHORIZATION)));
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(bookingService.getMonthlyCustomerSummary(userId));
+    }
+
+    @GetMapping("/api/v1/booking/monthly-hours-summary")
+    public ResponseEntity<Response<Map<Integer, Long>>> getMonthlyHoursSummary(HttpServletRequest servletRequest) {
+        Integer userId = Integer.valueOf(jwtTokenUtil.getAccountId(servletRequest.getHeader(HttpHeaders.AUTHORIZATION)));
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(bookingService.getMonthlyHoursSummary(userId));
+    }
+
+    @GetMapping("/api/v1/booking/monthly-status-summary")
+    public ResponseEntity<Response<Map<Integer, List<Map<String, Object>>>>> getMonthlyStatusSummary(
+            HttpServletRequest servletRequest) {
+        Integer userId = Integer.valueOf(jwtTokenUtil.getAccountId(servletRequest.getHeader(HttpHeaders.AUTHORIZATION)));
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(bookingService.getMonthlyStatusSummary(userId));
+    }
+
+
+
+
 }

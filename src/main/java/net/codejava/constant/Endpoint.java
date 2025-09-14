@@ -18,6 +18,7 @@ public class Endpoint {
             public static final String GET_DETAIL = BASE + "/my-profile";
             public static final String UPDATE = BASE + "/update";
             public static final String GET_MONEY_IN_WALLET = BASE + "/wallet";
+            public static final String GET_USER_BOOKING_PICKUP_CONFIRM =BASE + "/renting";
         }
 
         public static final class Car {

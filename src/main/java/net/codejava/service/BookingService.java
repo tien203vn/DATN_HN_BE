@@ -1,6 +1,7 @@
 package net.codejava.service;
 
 import java.util.List;
+import java.util.Map;
 
 import jakarta.mail.MessagingException;
 
@@ -51,4 +52,14 @@ public interface BookingService {
     Response<String> confirmBooking(Integer bookingId);
 
     Response<String> completeBooking(Integer bookingId, String note, Integer lateMinutes, Double compensationFee);
+
+    Response<Map<Integer, Long>> getMonthlyBookingSummary(Integer userId);
+
+    Response<Map<Integer, Long>> getMonthlyProductSummary(Integer userId);
+
+    Response<Map<Integer, Long>> getMonthlyCustomerSummary(Integer userId);
+
+    Response<Map<Integer, Long>> getMonthlyHoursSummary(Integer userId);
+
+    Response<Map<Integer, List<Map<String, Object>>>> getMonthlyStatusSummary(Integer userId);
 }
