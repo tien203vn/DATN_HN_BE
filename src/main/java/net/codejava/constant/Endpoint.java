@@ -33,6 +33,7 @@ public class Endpoint {
             public static final String STOP_RENTING_CAR = BASE + "/stop-renting-car/{id}";
             public static final String SEARCH_CAR = BASE + "/search";
             public static final String UPDATE_RATING = BASE + "/rating";
+            public static final String GET_ALL = BASE + "/all";
         }
 
         public static final class Booking {
