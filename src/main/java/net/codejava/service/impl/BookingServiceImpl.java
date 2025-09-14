@@ -243,7 +243,7 @@ public class BookingServiceImpl implements BookingService {
 
         // **Tính tiền thuê xe và gán vào cột rental_amount**
         long hours = TimeUtil.getHoursDifference(startDateTime, endDateTime);
-        double rentalAmount = hours * car.getBasePrice();
+        double rentalAmount = hours * car.getBasePrice() /24;
         newBooking.setRental_amount(rentalAmount);
 
         // Add Renter and Driver
@@ -658,7 +658,7 @@ public class BookingServiceImpl implements BookingService {
             }
         }
 
-        // Cập nhật thông tin booking
+        // Cập nh���t thông tin booking
         booking.setNote(note);
         booking.setLateMinute(lateMinutes != null ? lateMinutes : 0);
         booking.setCompensationFee(compensationFee != null ? compensationFee : 0.0);
@@ -744,7 +744,7 @@ public class BookingServiceImpl implements BookingService {
         int currentYear = LocalDateTime.now().getYear();
         List<Object[]> results = bookingRepo.countHoursByMonthForOwner(currentYear, userId);
 
-        // Khởi tạo Map với 12 tháng, giá trị mặc định là 0
+        // Khởi tạo Map với 12 tháng, gi�� trị mặc định là 0
         Map<Integer, Long> monthlySummary = new HashMap<>();
         for (int month = 1; month <= 12; month++) {
             monthlySummary.put(month, 0L);
@@ -784,6 +784,163 @@ public class BookingServiceImpl implements BookingService {
         }
 
         return Response.successfulResponse("Lấy tổng số đơn hàng theo trạng thái và tháng thành công.", monthlyStatusSummary);
+    }
+
+    @Override
+    public Response<Map<Integer, Double>> getMonthlyRevenueSummary(Integer userId) {
+        int currentYear = LocalDateTime.now().getYear();
+        List<Object[]> results = bookingRepo.calculateMonthlyRevenueForOwner(currentYear, userId);
+
+        // Khởi tạo Map với 12 tháng, giá trị mặc định là 0.0
+        Map<Integer, Double> monthlyRevenue = new HashMap<>();
+        for (int month = 1; month <= 12; month++) {
+            monthlyRevenue.put(month, 0.0);
+        }
+
+        // Ghi đè giá trị cho các tháng có dữ liệu
+        for (Object[] result : results) {
+            Integer month = (Integer) result[0];
+            Double revenue = (Double) result[1];
+            monthlyRevenue.put(month, revenue);
+        }
+
+        return Response.successfulResponse("Lấy tổng doanh thu theo từng tháng thành công.", monthlyRevenue);
+    }
+
+    @Override
+    public Response<Map<Integer, Double>> getMonthlyRepairCostSummary(Integer userId) {
+        int currentYear = LocalDateTime.now().getYear();
+        List<Object[]> results = bookingRepo.calculateMonthlyRepairCostForOwner(currentYear, userId);
+
+        // Khởi tạo Map với 12 tháng, giá trị mặc định là 0.0
+        Map<Integer, Double> monthlyRepairCostSummary = new HashMap<>();
+        for (int month = 1; month <= 12; month++) {
+            monthlyRepairCostSummary.put(month, 0.0);
+        }
+
+        // Ghi đè giá trị cho các tháng có dữ liệu
+        for (Object[] result : results) {
+            Integer month = (Integer) result[0];
+            Object repairCostObj = result[1];
+            Double repairCost = repairCostObj instanceof Integer
+                    ? ((Integer) repairCostObj).doubleValue()
+                    : (Double) repairCostObj;
+            monthlyRepairCostSummary.put(month, repairCost);
+        }
+
+        return Response.successfulResponse("Lấy tổng chi phí sửa chữa theo từng tháng thành công.", monthlyRepairCostSummary);
+    }
+
+    @Override
+    public Response<Map<Integer, Double>> getMonthlyLateFeeSummary(Integer userId) {
+        int currentYear = LocalDateTime.now().getYear();
+        List<Object[]> results = bookingRepo.calculateMonthlyLateFeeForOwner(currentYear, userId);
+
+        // Khởi tạo Map với 12 tháng, giá trị mặc định là 0.0
+        Map<Integer, Double> monthlyLateFeeSummary = new HashMap<>();
+        for (int month = 1; month <= 12; month++) {
+            monthlyLateFeeSummary.put(month, 0.0);
+        }
+
+        // Ghi đè giá trị cho các tháng có dữ liệu
+        for (Object[] result : results) {
+            Integer month = (Integer) result[0];
+            Double lateFee = (Double) result[1];
+            monthlyLateFeeSummary.put(month, lateFee);
+        }
+
+        return Response.successfulResponse("Lấy tổng số tiền phí trả xe muộn theo từng tháng thành công.", monthlyLateFeeSummary);
+    }
+
+    @Override
+    public Response<List<Map<String, Object>>> getTopRevenueCars(Integer userId) {
+        List<Object[]> results = bookingRepo.findTopRevenueCarsForOwner(userId);
+        results = results.stream().limit(10).toList(); // Giới hạn kết qu�� chỉ lấy top 10
+        // Chuyển đổi kết quả truy vấn thành danh sách Map
+        List<Map<String, Object>> topRevenueCars = results.stream()
+                .map(result -> Map.of(
+                        "carId", result[0],
+                        "carName", result[1],
+                        "totalRevenue", result[2]
+                ))
+                .toList();
+
+        return Response.successfulResponse("Lấy danh sách top 10 xe có doanh thu cao nhất thành công.", topRevenueCars);
+    }
+
+    @Override
+    public Response<List<Map<String, Object>>> getTopRentedCars(Integer userId) {
+        List<Object[]> results = bookingRepo.findTopRentedCarsForOwner(userId);
+
+        // Giới hạn kết quả chỉ lấy Top 10
+        results = results.stream().limit(10).toList();
+
+        // Chuyển đổi kết quả truy vấn thành danh sách Map
+        List<Map<String, Object>> topRentedCars = results.stream()
+                .map(result -> Map.of(
+                        "carId", result[0],
+                        "carName", result[1],
+                        "rentalCount", result[2]
+                ))
+                .toList();
+
+        return Response.successfulResponse("Lấy danh sách Top 10 xe được thuê nhiều nhất thành công.", topRentedCars);
+    }
+
+    @Override
+    public Response<Map<Integer, List<Map<String, Object>>>> getMonthlyTopRevenueCars(Integer userId) {
+        int currentYear = LocalDateTime.now().getYear();
+        List<Object[]> results = bookingRepo.findMonthlyTopRevenueCarsForOwner(currentYear, userId);
+
+        // Khởi tạo Map với 12 tháng, mỗi tháng là một danh sách xe
+        Map<Integer, List<Map<String, Object>>> monthlyTopRevenueCars = new HashMap<>();
+        for (int month = 1; month <= 12; month++) {
+            monthlyTopRevenueCars.put(month, new ArrayList<>());
+        }
+
+        // Ghi đè giá trị cho các tháng có dữ liệu
+        for (Object[] result : results) {
+            Integer month = (Integer) result[0];
+            Integer carId = (Integer) result[1];
+            String carName = (String) result[2];
+            Double totalRevenue = (Double) result[3];
+
+            monthlyTopRevenueCars.get(month).add(Map.of(
+                    "carId", carId,
+                    "carName", carName,
+                    "totalRevenue", totalRevenue
+            ));
+        }
+
+        return Response.successfulResponse("Lấy danh sách top xe có doanh thu cao nhất theo từng tháng thành công.", monthlyTopRevenueCars);
+    }
+
+    @Override
+    public Response<Map<Integer, List<Map<String, Object>>>> getMonthlyTopRentedCars(Integer userId) {
+        int currentYear = LocalDateTime.now().getYear();
+        List<Object[]> results = bookingRepo.findMonthlyTopRentedCarsForOwner(currentYear, userId);
+
+        // Khởi tạo Map với 12 tháng, mỗi tháng là một danh sách xe
+        Map<Integer, List<Map<String, Object>>> monthlyTopRentedCars = new HashMap<>();
+        for (int month = 1; month <= 12; month++) {
+            monthlyTopRentedCars.put(month, new ArrayList<>());
+        }
+
+        // Ghi đè giá trị cho các tháng có dữ liệu
+        for (Object[] result : results) {
+            Integer month = (Integer) result[0];
+            Integer carId = (Integer) result[1];
+            String carName = (String) result[2];
+            Long rentalCount = (Long) result[3];
+
+            monthlyTopRentedCars.get(month).add(Map.of(
+                    "carId", carId,
+                    "carName", carName,
+                    "rentalCount", rentalCount
+            ));
+        }
+
+        return Response.successfulResponse("Lấy danh sách top xe được thuê nhiều nhất theo từng tháng thành công.", monthlyTopRentedCars);
     }
 
 

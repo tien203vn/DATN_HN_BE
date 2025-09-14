@@ -117,4 +117,54 @@ public interface BookingRepository extends JpaRepository<Booking, Integer> {
            "GROUP BY b.user " +
            "ORDER BY COUNT(b) DESC")
     List<Object[]> getListCustomerWithPickupOrConfirmOrders(@Param("ownerId") Integer ownerId, Pageable pageable);
+
+    @Query("SELECT MONTH(b.startDateTime) AS month, SUM(COALESCE(b.rental_amount, 0) + COALESCE(b.extraFee, 0)) AS totalRevenue " +
+           "FROM Booking b " +
+           "WHERE YEAR(b.startDateTime) = :year AND b.car.carOwner.id = :userId " +
+           "GROUP BY MONTH(b.startDateTime) " +
+           "ORDER BY MONTH(b.startDateTime)")
+    List<Object[]> calculateMonthlyRevenueForOwner(@Param("year") int year, @Param("userId") Integer userId);
+
+    @Query("SELECT MONTH(b.startDateTime) AS month, b.car.id AS carId, SUM(COALESCE(b.compensationFee, 0)) AS totalRepairCost " +
+           "FROM Booking b " +
+           "WHERE YEAR(b.startDateTime) = :year AND b.car.carOwner.id = :userId " +
+           "GROUP BY MONTH(b.startDateTime), b.car.id " +
+           "ORDER BY MONTH(b.startDateTime), b.car.id")
+    List<Object[]> calculateMonthlyRepairCostForOwner(@Param("year") int year, @Param("userId") Integer userId);
+
+    @Query("SELECT MONTH(b.startDateTime) AS month, SUM(COALESCE(b.extraFee, 0)) AS totalLateFee " +
+           "FROM Booking b " +
+           "WHERE YEAR(b.startDateTime) = :year AND b.car.carOwner.id = :userId " +
+           "GROUP BY MONTH(b.startDateTime) " +
+           "ORDER BY MONTH(b.startDateTime)")
+    List<Object[]> calculateMonthlyLateFeeForOwner(@Param("year") int year, @Param("userId") Integer userId);
+
+    @Query("SELECT b.car.id AS carId, b.car.name AS carName, SUM(COALESCE(b.rental_amount, 0) + COALESCE(b.extraFee, 0)) AS totalRevenue " +
+           "FROM Booking b " +
+           "WHERE b.car.carOwner.id = :userId " +
+           "GROUP BY b.car.id, b.car.name " +
+           "ORDER BY totalRevenue DESC")
+    List<Object[]> findTopRevenueCarsForOwner(@Param("userId") Integer userId);
+
+    @Query("SELECT b.car.id AS carId, b.car.name AS carName, COUNT(b) AS rentalCount " +
+           "FROM Booking b " +
+           "WHERE b.car.carOwner.id = :userId " +
+           "GROUP BY b.car.id, b.car.name " +
+           "ORDER BY rentalCount DESC")
+    List<Object[]> findTopRentedCarsForOwner(@Param("userId") Integer userId);
+
+    @Query("SELECT MONTH(b.startDateTime) AS month, b.car.id AS carId, b.car.name AS carName, " +
+           "SUM(COALESCE(b.rental_amount, 0) + COALESCE(b.extraFee, 0)) AS totalRevenue " +
+           "FROM Booking b " +
+           "WHERE YEAR(b.startDateTime) = :year AND b.car.carOwner.id = :userId " +
+           "GROUP BY MONTH(b.startDateTime), b.car.id, b.car.name " +
+           "ORDER BY MONTH(b.startDateTime), totalRevenue DESC")
+    List<Object[]> findMonthlyTopRevenueCarsForOwner(@Param("year") int year, @Param("userId") Integer userId);
+
+    @Query("SELECT MONTH(b.startDateTime) AS month, b.car.id AS carId, b.car.name AS carName, COUNT(b) AS rentalCount " +
+           "FROM Booking b " +
+           "WHERE YEAR(b.startDateTime) = :year AND b.car.carOwner.id = :userId " +
+           "GROUP BY MONTH(b.startDateTime), b.car.id, b.car.name " +
+           "ORDER BY MONTH(b.startDateTime), rentalCount DESC")
+    List<Object[]> findMonthlyTopRentedCarsForOwner(@Param("year") int year, @Param("userId") Integer userId);
 }

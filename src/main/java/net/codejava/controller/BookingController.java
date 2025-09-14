@@ -187,6 +187,58 @@ public class BookingController {
                 .body(bookingService.getMonthlyStatusSummary(userId));
     }
 
+    @GetMapping("/api/v1/booking/monthly-revenue-summary")
+    public ResponseEntity<Response<Map<Integer, Double>>> getMonthlyRevenueSummary(HttpServletRequest servletRequest) {
+        Integer userId = Integer.valueOf(jwtTokenUtil.getAccountId(servletRequest.getHeader(HttpHeaders.AUTHORIZATION)));
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(bookingService.getMonthlyRevenueSummary(userId));
+    }
+
+    @GetMapping("/api/v1/booking/monthly-repair-cost-summary")
+    public ResponseEntity<Response<Map<Integer, Double>>> getMonthlyRepairCostSummary(
+            HttpServletRequest servletRequest) {
+        Integer userId = Integer.valueOf(jwtTokenUtil.getAccountId(servletRequest.getHeader(HttpHeaders.AUTHORIZATION)));
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(bookingService.getMonthlyRepairCostSummary(userId));
+    }
+
+    @GetMapping("/api/v1/booking/monthly-late-fee-summary")
+    public ResponseEntity<Response<Map<Integer, Double>>> getMonthlyLateFeeSummary(HttpServletRequest servletRequest) {
+        Integer userId = Integer.valueOf(jwtTokenUtil.getAccountId(servletRequest.getHeader(HttpHeaders.AUTHORIZATION)));
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(bookingService.getMonthlyLateFeeSummary(userId));
+    }
+
+    @GetMapping("/api/v1/booking/top-revenue-cars")
+    public ResponseEntity<Response<List<Map<String, Object>>>> getTopRevenueCars(HttpServletRequest servletRequest) {
+        Integer userId = Integer.valueOf(jwtTokenUtil.getAccountId(servletRequest.getHeader(HttpHeaders.AUTHORIZATION)));
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(bookingService.getTopRevenueCars(userId));
+    }
+
+    @GetMapping("/api/v1/booking/top-rented-cars")
+    public ResponseEntity<Response<List<Map<String, Object>>>> getTopRentedCars(HttpServletRequest servletRequest) {
+        Integer userId = Integer.valueOf(jwtTokenUtil.getAccountId(servletRequest.getHeader(HttpHeaders.AUTHORIZATION)));
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(bookingService.getTopRentedCars(userId));
+    }
+
+    @GetMapping("/api/v1/booking/monthly-top-revenue-cars")
+    public ResponseEntity<Response<Map<Integer, List<Map<String, Object>>>>> getMonthlyTopRevenueCars(
+            HttpServletRequest servletRequest) {
+        Integer userId = Integer.valueOf(jwtTokenUtil.getAccountId(servletRequest.getHeader(HttpHeaders.AUTHORIZATION)));
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(bookingService.getMonthlyTopRevenueCars(userId));
+    }
+
+    @GetMapping("/api/v1/booking/monthly-top-rented-cars")
+    public ResponseEntity<Response<Map<Integer, List<Map<String, Object>>>>> getMonthlyTopRentedCars(
+            HttpServletRequest servletRequest) {
+        Integer userId = Integer.valueOf(jwtTokenUtil.getAccountId(servletRequest.getHeader(HttpHeaders.AUTHORIZATION)));
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(bookingService.getMonthlyTopRentedCars(userId));
+    }
+
 
 
 

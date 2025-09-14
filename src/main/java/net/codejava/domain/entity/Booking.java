@@ -57,8 +57,9 @@ public class Booking {
     private Double total;
 
     public Double getTotal() {
-        Integer hours = TimeUtil.getHoursDifference(startDateTime, endDateTime);
-        return hours * (car.getBasePrice() / 24);
+//        Integer hours = TimeUtil.getHoursDifference(startDateTime, endDateTime);
+//        return hours * (car.getBasePrice() / 24);
+        return rental_amount;
     }
 
     @Transient

@@ -62,4 +62,18 @@ public interface BookingService {
     Response<Map<Integer, Long>> getMonthlyHoursSummary(Integer userId);
 
     Response<Map<Integer, List<Map<String, Object>>>> getMonthlyStatusSummary(Integer userId);
+
+    Response<Map<Integer, Double>> getMonthlyRevenueSummary(Integer userId);
+
+    Response<Map<Integer, Double>> getMonthlyRepairCostSummary(Integer userId);
+
+    Response<Map<Integer, Double>> getMonthlyLateFeeSummary(Integer userId);
+
+    Response<List<Map<String, Object>>> getTopRevenueCars(Integer userId);
+
+    Response<List<Map<String, Object>>> getTopRentedCars(Integer userId);
+
+    Response<Map<Integer, List<Map<String, Object>>>> getMonthlyTopRevenueCars(Integer userId);
+
+    Response<Map<Integer, List<Map<String, Object>>>> getMonthlyTopRentedCars(Integer userId);
 }
