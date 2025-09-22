@@ -329,4 +329,21 @@ public class CarServiceImpl implements CarService {
                         .build(),
                 li);
     }
+
+
+
+    @Override
+    public Response<List<CarDetailResponseDTO>> getAllCars() {
+        List<Car> cars = carRepo.findAll(); // lấy toàn bộ record trong bảng cars
+
+        if (cars.isEmpty()) {
+            throw new AppException("List car is empty");
+        }
+
+        List<CarDetailResponseDTO> carDTOs = cars.stream()
+                .map(carMapper::toCarDetailResponseDTO) // map sang DTO đầy đủ
+                .toList();
+
+        return Response.successfulResponse("Get all cars successful", carDTOs);
+    }
 }

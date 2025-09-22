@@ -43,4 +43,6 @@ public interface CarService {
 
     MetaResponse<MetaResponseDTO, List<CarResponseDTO>> searchCarV2(
             String address, String startTime, String endTime, MetaRequestDTO metaRequestDTO);
+
+    Response<List<CarDetailResponseDTO>> getAllCars();
 }

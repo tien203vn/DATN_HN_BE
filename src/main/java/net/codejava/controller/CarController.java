@@ -105,4 +105,9 @@ public class CarController {
                 .body(carService.searchCarV2(
                         requestDTO.address(), requestDTO.startTime(), requestDTO.endTime(), metaRequestDTO));
     }
+
+    @GetMapping(Endpoint.V1.Car.GET_ALL)
+    public ResponseEntity<Response<List<CarDetailResponseDTO>>> getAllCars() {
+        return ResponseEntity.ok(carService.getAllCars());
+    }
 }
