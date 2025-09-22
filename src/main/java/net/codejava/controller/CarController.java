@@ -5,6 +5,7 @@ import java.util.List;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
+import net.codejava.domain.dto.meta.MetaRequestDTOV2;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -39,6 +40,12 @@ public class CarController {
         Integer ownerId =
                 Integer.valueOf(jwtTokenUtil.getAccountId(servletRequest.getHeader(HttpHeaders.AUTHORIZATION)));
         return ResponseEntity.status(HttpStatus.OK).body(carService.getListCarByOwner(requestDTO, ownerId));
+    }
+
+    @GetMapping(Endpoint.V1.Car.GET_LIST)
+    public ResponseEntity<MetaResponse<MetaResponseDTO, List<CarResponseDTO>>> getList(
+            HttpServletRequest servletRequest, @ParameterObject MetaRequestDTOV2 requestDTO) {
+        return ResponseEntity.status(HttpStatus.OK).body(carService.getList(requestDTO));
     }
 
     @GetMapping(Endpoint.V1.Car.GET_LIST_CONFIRM_FOR_OWNER)

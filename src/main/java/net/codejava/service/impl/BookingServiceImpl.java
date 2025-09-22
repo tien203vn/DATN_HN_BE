@@ -160,6 +160,53 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
+    public MetaResponse<MetaResponseDTO, List<BookingResponseDTO>> getAllBookings(BookingFilterDTO requestDTO) {
+        Pageable pageable = PageRequest.of(requestDTO.getCurrentPage(), requestDTO.getLimit());
+        BookingStatus status = null;
+        if (requestDTO.getBookingStatus() != null) {
+            try {
+                status = BookingStatus.valueOf(requestDTO.getBookingStatus());
+            } catch (IllegalArgumentException e) {
+                throw new AppException("Trạng thái booking không hợp lệ");
+            }
+        }
+
+        LocalDateTime startDateTime = null;
+        LocalDateTime endDateTime = null;
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        if (requestDTO.getStartDateTime() != null && !requestDTO.getStartDateTime().isEmpty()) {
+            startDateTime = LocalDateTime.parse(requestDTO.getStartDateTime(), formatter);
+        }
+        if (requestDTO.getEndDateTime() != null && !requestDTO.getEndDateTime().isEmpty()) {
+            endDateTime = LocalDateTime.parse(requestDTO.getEndDateTime(), formatter);
+        }
+        
+        Page<Booking> page = bookingRepo.findAllBookingsByFilter(
+                status,
+                requestDTO.getCarName(),
+                startDateTime,
+                endDateTime,
+                pageable
+        );
+
+        if (page.getContent().isEmpty()) throw new AppException("Danh sách đặt xe trống");
+
+        List<BookingResponseDTO> li = page.getContent().stream()
+                .map(bookingMapper::toBookingResponseDto)
+                .toList();
+
+        return MetaResponse.successfulResponse(
+                "Lấy tất cả danh sách đặt xe thành công",
+                MetaResponseDTO.builder()
+                        .totalItems((int) page.getTotalElements())
+                        .totalPages(page.getTotalPages())
+                        .currentPage(requestDTO.getCurrentPage())
+                        .pageSize(requestDTO.getLimit())
+                        .build(),
+                li);
+    }
+
+    @Override
     public MetaResponse<MetaResponseDTO, List<BookingResponseForOwnerDTO>> getListBookingByCarId(
             MetaRequestDTO metaRequestDTO, Integer carId, Integer userId) {
         // Car

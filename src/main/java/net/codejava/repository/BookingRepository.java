@@ -51,6 +51,13 @@ public interface BookingRepository extends JpaRepository<Booking, Integer> {
     List<Object[]> getListCustomerWithBookingCountByOwnerId(
             @Param("ownerId") Integer ownerId, @Param("userName") String userName, Pageable pageable);
 
+    @Query("SELECT u, COALESCE(COUNT(b), 0) FROM User u " +
+            "LEFT JOIN Booking b ON b.user = u " +
+            "WHERE (:userName IS NULL OR LOWER(u.username) LIKE LOWER(CONCAT('%', :userName, '%'))) " +
+            "GROUP BY u")
+    List<Object[]> getListCustomer(
+             @Param("userName") String userName, Pageable pageable);
+
     List<Booking> findAllByStatusAndStartDateTimeBefore(BookingStatus status, LocalDateTime time);
 
     List<Booking> findAllByStatus(BookingStatus status);
@@ -62,6 +69,19 @@ public interface BookingRepository extends JpaRepository<Booking, Integer> {
             + "AND (:endDateTime IS NULL OR b.endDateTime <= :endDateTime)")
     Page<Booking> findBookingsByFilter(
             @Param("userId") Integer userId,
+            @Param("bookingStatus") BookingStatus bookingStatus,
+            @Param("carName") String carName,
+            @Param("startDateTime") LocalDateTime startDateTime,
+            @Param("endDateTime") LocalDateTime endDateTime,
+            Pageable pageable
+    );
+
+    @Query("SELECT b FROM Booking b WHERE 1=1 "
+            + "AND (:bookingStatus IS NULL OR b.status = :bookingStatus) "
+            + "AND (:carName IS NULL OR b.car.name LIKE %:carName%) "
+            + "AND (:startDateTime IS NULL OR b.startDateTime >= :startDateTime) "
+            + "AND (:endDateTime IS NULL OR b.endDateTime <= :endDateTime)")
+    Page<Booking> findAllBookingsByFilter(
             @Param("bookingStatus") BookingStatus bookingStatus,
             @Param("carName") String carName,
             @Param("startDateTime") LocalDateTime startDateTime,
@@ -167,4 +187,6 @@ public interface BookingRepository extends JpaRepository<Booking, Integer> {
            "GROUP BY MONTH(b.startDateTime), b.car.id, b.car.name " +
            "ORDER BY MONTH(b.startDateTime), rentalCount DESC")
     List<Object[]> findMonthlyTopRentedCarsForOwner(@Param("year") int year, @Param("userId") Integer userId);
+
+    boolean existsByUserAndStatusIn(User user, List<String> statuses);
 }

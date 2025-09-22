@@ -43,6 +43,13 @@ public class BookingController {
                 .body(bookingService.getListBookingForUserManager(metaRequestDTO, userId));
     }
 
+    @io.swagger.v3.oas.annotations.Operation(summary = "Get All Bookings", description = "This API allows admin to get all bookings with filters.")
+    @GetMapping(Endpoint.V1.Booking.GET_ALL_BOOKINGS)
+    public ResponseEntity<MetaResponse<MetaResponseDTO, List<BookingResponseDTO>>> getAllBookings(
+            @ParameterObject BookingFilterDTO requestDTO) {
+        return ResponseEntity.status(HttpStatus.OK).body(bookingService.getAllBookings(requestDTO));
+    }
+
     @GetMapping(Endpoint.V1.Booking.GET_LIST_FOR_USER)
     public ResponseEntity<MetaResponse<MetaResponseDTO, List<BookingResponseDTO>>> getListBookingForUser(
             HttpServletRequest servletRequest, @ParameterObject MetaRequestDTO metaRequestDTO) {

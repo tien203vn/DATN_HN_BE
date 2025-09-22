@@ -64,6 +64,14 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(userService.getListUserBooking(metaRequestDTO, userId));
     }
 
+    @GetMapping(Endpoint.V1.User.GET_USER_LIST)
+    public ResponseEntity<MetaResponse<MetaResponseDTO, List<UserBookingCountDTO>>> getListUserManager(
+            HttpServletRequest servletRequest, @ParameterObject MetaRequestDTO metaRequestDTO) {
+        Integer userId =
+                Integer.valueOf(jwtTokenUtil.getAccountId(servletRequest.getHeader(HttpHeaders.AUTHORIZATION)));
+        return ResponseEntity.status(HttpStatus.OK).body(userService.getListUser(metaRequestDTO));
+    }
+
     @Operation(summary = "Get wallet User For User", description = "This API allows users to get my wallet.")
     @GetMapping(Endpoint.V1.User.GET_MONEY_IN_WALLET)
     public ResponseEntity<Response<Map<String, String>>> getMyWallet() {
@@ -80,5 +88,17 @@ public class UserController {
                 Integer.valueOf(jwtTokenUtil.getAccountId(servletRequest.getHeader(HttpHeaders.AUTHORIZATION)));
         return ResponseEntity.status(HttpStatus.OK)
                 .body(userService.getListUserWithPickupOrConfirmOrders(metaRequestDTO, userId));
+    }
+
+    @Operation(summary = "Toggle User Status", description = "This API allows admin to toggle user status (active/inactive).")
+    @PutMapping(Endpoint.V1.User.TOGGLE_STATUS)
+    public ResponseEntity<Response<String>> toggleUserStatus(@PathVariable Integer id) {
+        return ResponseEntity.status(HttpStatus.OK).body(userService.toggleUserStatus(id));
+    }
+
+    @Operation(summary = "Delete User", description = "This API allows admin to delete a user account.")
+    @DeleteMapping(Endpoint.V1.User.DELETE_USER)
+    public ResponseEntity<Response<String>> deleteUser(@PathVariable Integer id) {
+        return ResponseEntity.status(HttpStatus.OK).body(userService.deleteUser(id));
     }
 }

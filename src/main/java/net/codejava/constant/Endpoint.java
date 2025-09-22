@@ -15,15 +15,19 @@ public class Endpoint {
         public static final class User {
             public static final String BASE = PREFIX + "/user";
             public static final String GET_USER_BOOKING = PREFIX + "/user-booking";
+            public static final String GET_USER_LIST = PREFIX + "/user-list";
             public static final String GET_DETAIL = BASE + "/my-profile";
             public static final String UPDATE = BASE + "/update";
             public static final String GET_MONEY_IN_WALLET = BASE + "/wallet";
             public static final String GET_USER_BOOKING_PICKUP_CONFIRM =BASE + "/renting";
+            public static final String TOGGLE_STATUS = BASE + "/toggle-status/{id}";
+            public static final String DELETE_USER = BASE + "/delete/{id}";
         }
 
         public static final class Car {
             public static final String BASE = PREFIX + "/car";
             public static final String GET_LIST_FOR_OWNER = BASE + "/my-car";
+            public static final String GET_LIST = BASE + "/list-car";
             public static final String GET_LIST_CONFIRM_FOR_OWNER = BASE + "/car-confirm";
             public static final String GET_LIST_IN_ACTIVE_FOR_OWNER = BASE + "/my-car-in-active";
             public static final String GET_DETAIL = BASE + "/{id}";
@@ -40,6 +44,7 @@ public class Endpoint {
             public static final String GET_LIST_FOR_USER = BASE + "/my-booking";
             public static final String GET_LIST_BOOKING = BASE + "/list-booking";
             public static final String GET_LIST_BOOKING_ACTIVE = BASE + "/list-booking-active";
+            public static final String GET_ALL_BOOKINGS = BASE + "/all";
             public static final String GET_LIST_BY_CAR = BASE + "/my-booking/{carId}";
             public static final String GET_DETAIL = BASE + "/{id}";
             public static final String ADD_BOOKING = BASE + "/add";

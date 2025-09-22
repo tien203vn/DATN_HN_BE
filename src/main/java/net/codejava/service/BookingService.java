@@ -23,6 +23,7 @@ public interface BookingService {
     MetaResponse<MetaResponseDTO, List<BookingResponseDTO>> getListBookingForUserManager(
             BookingFilterDTO requestDTO, Integer userId);
 
+    MetaResponse<MetaResponseDTO, List<BookingResponseDTO>> getAllBookings(BookingFilterDTO requestDTO);
 
     MetaResponse<MetaResponseDTO, List<BookingResponseForOwnerDTO>> getListBookingByCarId(
             MetaRequestDTO requestDTO, Integer carId, Integer userId);

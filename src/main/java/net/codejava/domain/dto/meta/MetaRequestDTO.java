@@ -2,6 +2,7 @@ package net.codejava.domain.dto.meta;
 
 import java.util.Objects;
 
+import lombok.Setter;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import net.codejava.constant.MetaConstant;

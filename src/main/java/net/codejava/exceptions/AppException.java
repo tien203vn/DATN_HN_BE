@@ -1,7 +1,12 @@
 package net.codejava.exceptions;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
+@Builder
+@AllArgsConstructor
 public class AppException extends RuntimeException {
     @Getter
     private Object[] args;
