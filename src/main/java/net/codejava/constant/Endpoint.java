@@ -35,6 +35,7 @@ public class Endpoint {
             public static final String ADD_CAR = BASE + "/add";
             public static final String UPDATE = BASE + "/update/{id}";
             public static final String STOP_RENTING_CAR = BASE + "/stop-renting-car/{id}";
+            public static final String RENTING_CAR = BASE + "/renting-car/{id}";
             public static final String SEARCH_CAR = BASE + "/search";
             public static final String UPDATE_RATING = BASE + "/rating";
             public static final String GET_ALL = BASE + "/all";
@@ -55,6 +56,20 @@ public class Endpoint {
             public static final String CONFIRM_PAYMENT = BASE + "/confirm-payment/{id}";
             public static final String CANCELLED_BOOKING = BASE + "/cancel/{id}";
             public static final String RETURN_CAR = BASE + "/return-car/{id}";
+            
+            // Admin endpoints
+            public static final String ADMIN_MONTHLY_SUMMARY = BASE + "/admin/monthly-summary";
+            public static final String ADMIN_MONTHLY_PRODUCT_SUMMARY = BASE + "/admin/monthly-product-summary";
+            public static final String ADMIN_MONTHLY_CUSTOMER_SUMMARY = BASE + "/admin/monthly-customer-summary";
+            public static final String ADMIN_MONTHLY_HOURS_SUMMARY = BASE + "/admin/monthly-hours-summary";
+            public static final String ADMIN_MONTHLY_STATUS_SUMMARY = BASE + "/admin/monthly-status-summary";
+            public static final String ADMIN_MONTHLY_REVENUE_SUMMARY = BASE + "/admin/monthly-revenue-summary";
+            public static final String ADMIN_MONTHLY_REPAIR_COST_SUMMARY = BASE + "/admin/monthly-repair-cost-summary";
+            public static final String ADMIN_MONTHLY_LATE_FEE_SUMMARY = BASE + "/admin/monthly-late-fee-summary";
+            public static final String ADMIN_TOP_REVENUE_CARS = BASE + "/admin/top-revenue-cars";
+            public static final String ADMIN_TOP_RENTED_CARS = BASE + "/admin/top-rented-cars";
+            public static final String ADMIN_MONTHLY_TOP_REVENUE_CARS = BASE + "/admin/monthly-top-revenue-cars";
+            public static final String ADMIN_MONTHLY_TOP_RENTED_CARS = BASE + "/admin/monthly-top-rented-cars";
         }
 
         public static final class Transaction {

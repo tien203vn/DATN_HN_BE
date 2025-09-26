@@ -77,4 +77,15 @@ public interface BookingService {
     Response<Map<Integer, List<Map<String, Object>>>> getMonthlyTopRevenueCars(Integer userId);
 
     Response<Map<Integer, List<Map<String, Object>>>> getMonthlyTopRentedCars(Integer userId);
+
+    // Admin methods - chỉ 5 methods theo yêu cầu
+    Response<Map<Integer, Long>> adminMonthlyBookingSummary();
+    
+    Response<Map<Integer, Long>> adminMonthlyProductSummary();
+    
+    Response<Map<Integer, Long>> adminMonthlyCustomerSummary();
+    
+    Response<Map<Integer, Long>> adminMonthlyHoursSummary();
+    
+    Response<Map<Integer, List<Map<String, Object>>>> adminMonthlyStatusSummary();
 }

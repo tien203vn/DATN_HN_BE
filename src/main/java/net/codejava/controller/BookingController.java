@@ -246,7 +246,34 @@ public class BookingController {
                 .body(bookingService.getMonthlyTopRentedCars(userId));
     }
 
+    // Admin endpoints - chỉ 4 API như yêu cầu
+    @io.swagger.v3.oas.annotations.Operation(summary = "Admin: Monthly Summary", description = "Admin version of monthly-summary")
+    @GetMapping("/api/v1/booking/admin/monthly-summary")
+    public ResponseEntity<Response<Map<Integer, Long>>> adminMonthlyBookingSummary() {
+        return ResponseEntity.status(HttpStatus.OK).body(bookingService.adminMonthlyBookingSummary());
+    }
 
+    @io.swagger.v3.oas.annotations.Operation(summary = "Admin: Monthly Product Summary", description = "Admin version of monthly-product-summary")
+    @GetMapping("/api/v1/booking/admin/monthly-product-summary")
+    public ResponseEntity<Response<Map<Integer, Long>>> adminMonthlyProductSummary() {
+        return ResponseEntity.status(HttpStatus.OK).body(bookingService.adminMonthlyProductSummary());
+    }
 
+    @io.swagger.v3.oas.annotations.Operation(summary = "Admin: Monthly Customer Summary", description = "Admin version of monthly-customer-summary")
+    @GetMapping("/api/v1/booking/admin/monthly-customer-summary")
+    public ResponseEntity<Response<Map<Integer, Long>>> adminMonthlyCustomerSummary() {
+        return ResponseEntity.status(HttpStatus.OK).body(bookingService.adminMonthlyCustomerSummary());
+    }
 
+    @io.swagger.v3.oas.annotations.Operation(summary = "Admin: Monthly Hours Summary", description = "Admin version of monthly-hours-summary")
+    @GetMapping("/api/v1/booking/admin/monthly-hours-summary")
+    public ResponseEntity<Response<Map<Integer, Long>>> adminMonthlyHoursSummary() {
+        return ResponseEntity.status(HttpStatus.OK).body(bookingService.adminMonthlyHoursSummary());
+    }
+
+    @io.swagger.v3.oas.annotations.Operation(summary = "Admin: Monthly Status Summary", description = "Admin version of monthly-status-summary")
+    @GetMapping("/api/v1/booking/admin/monthly-status-summary")
+    public ResponseEntity<Response<Map<Integer, List<Map<String, Object>>>>> adminMonthlyStatusSummary() {
+        return ResponseEntity.status(HttpStatus.OK).body(bookingService.adminMonthlyStatusSummary());
+    }
 }

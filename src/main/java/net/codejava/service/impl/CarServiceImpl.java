@@ -277,10 +277,21 @@ public class CarServiceImpl implements CarService {
         Car car = findCar.get();
         String message = "Stop renting a car successful";
         if (car.getIsStopped()) message = "Re-renting a car successful";
-        car.setIsStopped(false);
-        car.setIsAvailable(true);
+        car.setIsStopped(true);
+        car.setIsAvailable(false);
         carRepo.save(findCar.get());
         return Response.successfulResponse(message);
+    }
+
+    @Override
+    public Response<String> rentingCar(Integer carId) {
+        Optional<Car> findCar = carRepo.findById(carId);
+        if (findCar.isEmpty()) throw new AppException("This car is not existed");
+        Car car = findCar.get();
+        car.setIsStopped(false);
+        car.setIsAvailable(true);
+        carRepo.save(car);
+        return Response.successfulResponse("Start renting a car successful");
     }
 
     @Override

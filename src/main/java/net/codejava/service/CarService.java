@@ -38,6 +38,8 @@ public interface CarService {
     Response<CarDetailResponseDTO> updateCar(Integer id, UpdCarRequestDTO requestDTO);
 
     Response<String> stopRentingCar(Integer carId);
+    
+    Response<String> rentingCar(Integer carId);
 
     PageCriteria<List<CarResponseDTO>> searchCar(MetaRequestDTO requestDTO, String... search);
 

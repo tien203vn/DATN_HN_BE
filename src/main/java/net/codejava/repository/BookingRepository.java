@@ -189,4 +189,40 @@ public interface BookingRepository extends JpaRepository<Booking, Integer> {
     List<Object[]> findMonthlyTopRentedCarsForOwner(@Param("year") int year, @Param("userId") Integer userId);
 
     boolean existsByUserAndStatusIn(User user, List<String> statuses);
+
+    // Admin methods - chỉ copy query user và bỏ điều kiện userId
+    @Query("SELECT MONTH(b.startDateTime) AS month, COUNT(b) AS totalBookings " +
+            "FROM Booking b " +
+            "WHERE YEAR(b.startDateTime) = :year " +
+            "GROUP BY MONTH(b.startDateTime) " +
+            "ORDER BY MONTH(b.startDateTime)")
+    List<Object[]> countAllBookingsByMonth(@Param("year") int year);
+
+    @Query("SELECT MONTH(b.startDateTime) AS month, COUNT(DISTINCT b.car.id) AS totalProducts " +
+           "FROM Booking b " +
+           "WHERE YEAR(b.startDateTime) = :year " +
+           "GROUP BY MONTH(b.startDateTime) " +
+           "ORDER BY MONTH(b.startDateTime)")
+    List<Object[]> countAllProductsByMonth(@Param("year") int year);
+
+    @Query("SELECT MONTH(b.startDateTime) AS month, COUNT(DISTINCT b.user.id) AS totalCustomers " +
+           "FROM Booking b " +
+           "WHERE YEAR(b.startDateTime) = :year " +
+           "GROUP BY MONTH(b.startDateTime) " +
+           "ORDER BY MONTH(b.startDateTime)")
+    List<Object[]> countAllCustomersByMonth(@Param("year") int year);
+
+    @Query("SELECT MONTH(b.startDateTime) AS month, SUM(TIMESTAMPDIFF(HOUR, b.startDateTime, b.endDateTime)) AS totalHours " +
+           "FROM Booking b " +
+           "WHERE YEAR(b.startDateTime) = :year " +
+           "GROUP BY MONTH(b.startDateTime) " +
+           "ORDER BY MONTH(b.startDateTime)")
+    List<Object[]> countAllHoursByMonth(@Param("year") int year);
+
+    @Query("SELECT MONTH(b.startDateTime) AS month, b.status AS status, COUNT(b) AS count " +
+           "FROM Booking b " +
+           "WHERE YEAR(b.startDateTime) = :year " +
+           "GROUP BY MONTH(b.startDateTime), b.status " +
+           "ORDER BY MONTH(b.startDateTime)")
+    List<Object[]> getAllMonthlyStatusSummary(@Param("year") int year);
 }

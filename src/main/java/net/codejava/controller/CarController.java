@@ -98,6 +98,13 @@ public class CarController {
         return ResponseEntity.status(HttpStatus.OK).body(carService.stopRentingCar(carId));
     }
 
+    @PatchMapping(Endpoint.V1.Car.RENTING_CAR)
+    public ResponseEntity<Response<String>> rentingCar(@PathVariable(name = "id") Integer carId) {
+        User user =
+                (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return ResponseEntity.status(HttpStatus.OK).body(carService.rentingCar(carId));
+    }
+
     @GetMapping(Endpoint.V1.Car.SEARCH_CAR)
     public ResponseEntity<MetaResponse<MetaResponseDTO, List<CarResponseDTO>>> searchCars(
             @ParameterObject @Valid SearchCarRequestDTO requestDTO, @ParameterObject MetaRequestDTO metaRequestDTO) {

@@ -990,5 +990,106 @@ public class BookingServiceImpl implements BookingService {
         return Response.successfulResponse("Lấy danh sách top xe được thuê nhiều nhất theo từng tháng thành công.", monthlyTopRentedCars);
     }
 
+    // Admin methods - chỉ copy từ user methods và bỏ userId
+    @Override
+    public Response<Map<Integer, Long>> adminMonthlyBookingSummary() {
+        int currentYear = LocalDateTime.now().getYear();
+        List<Object[]> results = bookingRepo.countAllBookingsByMonth(currentYear);
+
+        Map<Integer, Long> monthlySummary = new HashMap<>();
+        for (int month = 1; month <= 12; month++) {
+            monthlySummary.put(month, 0L);
+        }
+
+        for (Object[] result : results) {
+            Integer month = (Integer) result[0];
+            Long count = (Long) result[1];
+            monthlySummary.put(month, count);
+        }
+
+        return Response.successfulResponse("Lấy tổng số đơn hàng theo từng tháng thành công.", monthlySummary);
+    }
+
+    @Override
+    public Response<Map<Integer, Long>> adminMonthlyProductSummary() {
+        int currentYear = LocalDateTime.now().getYear();
+        List<Object[]> results = bookingRepo.countAllProductsByMonth(currentYear);
+
+        Map<Integer, Long> monthlySummary = new HashMap<>();
+        for (int month = 1; month <= 12; month++) {
+            monthlySummary.put(month, 0L);
+        }
+
+        for (Object[] result : results) {
+            Integer month = (Integer) result[0];
+            Long count = (Long) result[1];
+            monthlySummary.put(month, count);
+        }
+
+        return Response.successfulResponse("Lấy tổng số sản phẩm theo từng tháng thành công.", monthlySummary);
+    }
+
+    @Override
+    public Response<Map<Integer, Long>> adminMonthlyCustomerSummary() {
+        int currentYear = LocalDateTime.now().getYear();
+        List<Object[]> results = bookingRepo.countAllCustomersByMonth(currentYear);
+
+        Map<Integer, Long> monthlySummary = new HashMap<>();
+        for (int month = 1; month <= 12; month++) {
+            monthlySummary.put(month, 0L);
+        }
+
+        for (Object[] result : results) {
+            Integer month = (Integer) result[0];
+            Long count = (Long) result[1];
+            monthlySummary.put(month, count);
+        }
+
+        return Response.successfulResponse("Lấy tổng số khách hàng theo từng tháng thành công.", monthlySummary);
+    }
+
+    @Override
+    public Response<Map<Integer, Long>> adminMonthlyHoursSummary() {
+        int currentYear = LocalDateTime.now().getYear();
+        List<Object[]> results = bookingRepo.countAllHoursByMonth(currentYear);
+
+        Map<Integer, Long> monthlySummary = new HashMap<>();
+        for (int month = 1; month <= 12; month++) {
+            monthlySummary.put(month, 0L);
+        }
+
+        for (Object[] result : results) {
+            Integer month = (Integer) result[0];
+            Long hours = ((Number) result[1]).longValue();
+            monthlySummary.put(month, hours);
+        }
+
+        return Response.successfulResponse("Lấy tổng số giờ thuê theo từng tháng thành công.", monthlySummary);
+    }
+
+    @Override
+    public Response<Map<Integer, List<Map<String, Object>>>> adminMonthlyStatusSummary() {
+        int currentYear = LocalDateTime.now().getYear();
+        List<Object[]> results = bookingRepo.getAllMonthlyStatusSummary(currentYear);
+
+        Map<Integer, List<Map<String, Object>>> monthlyStatusSummary = new HashMap<>();
+        for (int month = 1; month <= 12; month++) {
+            monthlyStatusSummary.put(month, new ArrayList<>());
+        }
+
+        for (Object[] result : results) {
+            Integer month = (Integer) result[0];
+            Object statusObj = result[1];
+            String status = statusObj.toString(); // Chuyển enum thành String
+            Long count = (Long) result[2];
+
+            monthlyStatusSummary.get(month).add(Map.of(
+                    "name", status,
+                    "value", count
+            ));
+        }
+
+        return Response.successfulResponse("Lấy thống kê trạng thái đơn hàng theo từng tháng thành công.", monthlyStatusSummary);
+    }
 
 }
