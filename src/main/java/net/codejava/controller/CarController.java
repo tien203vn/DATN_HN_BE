@@ -5,7 +5,6 @@ import java.util.List;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
-import net.codejava.domain.dto.meta.MetaRequestDTOV2;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -19,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import net.codejava.constant.Endpoint;
 import net.codejava.domain.dto.car.*;
 import net.codejava.domain.dto.meta.MetaRequestDTO;
+import net.codejava.domain.dto.meta.MetaRequestDTOV2;
 import net.codejava.domain.dto.meta.MetaResponseDTO;
 import net.codejava.domain.entity.User;
 import net.codejava.responses.MetaResponse;

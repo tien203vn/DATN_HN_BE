@@ -41,7 +41,7 @@ import net.codejava.utility.JwtTokenUtil;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
     private static final Logger log = LoggerFactory.getLogger(UserServiceImpl.class);
-    
+
     private final UserMapper userMapper;
     private final ImageRepository imageRepo;
     private final UserRepository userRepo;
@@ -137,7 +137,7 @@ public class UserServiceImpl implements UserService {
         MetaResponseDTO meta = MetaResponseDTO.builder()
                 .totalItems(li.size())
                 .totalPages((int) Math.ceil((double) li.size() / 10))
-                .currentPage(requestDTO.currentPage()-1)
+                .currentPage(requestDTO.currentPage() - 1)
                 .pageSize(10)
                 .sorting(net.codejava.domain.dto.meta.SortingDTO.builder()
                         .sortField(requestDTO.sortField())
@@ -149,11 +149,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public MetaResponse<MetaResponseDTO, List<UserBookingCountDTO>> getListUser(
-            MetaRequestDTO requestDTO) {
-        Pageable pageable = PageRequest.of(requestDTO.currentPage() -1, 100);
-        List<Object[]> results =
-                bookingRepo.getListCustomer( requestDTO.keyword(), pageable);
+    public MetaResponse<MetaResponseDTO, List<UserBookingCountDTO>> getListUser(MetaRequestDTO requestDTO) {
+        Pageable pageable = PageRequest.of(requestDTO.currentPage() - 1, 100);
+        List<Object[]> results = bookingRepo.getListCustomer(requestDTO.keyword(), pageable);
 
         if (results.isEmpty()) throw new AppException("Danh sách khách hàng trống");
 
@@ -167,7 +165,7 @@ public class UserServiceImpl implements UserService {
         MetaResponseDTO meta = MetaResponseDTO.builder()
                 .totalItems(li.size())
                 .totalPages((int) Math.ceil((double) li.size() / 10))
-                .currentPage(requestDTO.currentPage()-1)
+                .currentPage(requestDTO.currentPage() - 1)
                 .pageSize(10)
                 .sorting(net.codejava.domain.dto.meta.SortingDTO.builder()
                         .sortField(requestDTO.sortField())
@@ -245,26 +243,24 @@ public class UserServiceImpl implements UserService {
         User user = userOptional.get();
 
         // Kiểm tra xem user có đang có booking đang hoạt động không
-        boolean hasActiveBookings = bookingRepo.existsByUserAndStatusIn(
-                user,
-                List.of("PENDING_DEPOSIT", "PICK_UP")
-        );
+        boolean hasActiveBookings = bookingRepo.existsByUserAndStatusIn(user, List.of("PENDING_DEPOSIT", "PICK_UP"));
 
         if (hasActiveBookings) {
             throw new AppException("Không thể xóa người dùng vì đang có booking đang hoạt động");
         }
 
         // Xóa avatar từ cloudinary nếu có
-//        if (user.getAvatar() != null && !user.getAvatar().getUrl().equals(DefaultAvatar.AVATAR_URL)) {
-//            try {
-//                cloudinaryService.deleteImage(user.getAvatar().getPublicId());
-//            } catch (Exception e) {
-//                // Log lỗi nhưng vẫn tiếp tục xóa user
-//                log.error("Lỗi khi xóa avatar từ cloudinary: {}", e.getMessage());
-//            }
-//        }
+        //        if (user.getAvatar() != null && !user.getAvatar().getUrl().equals(DefaultAvatar.AVATAR_URL)) {
+        //            try {
+        //                cloudinaryService.deleteImage(user.getAvatar().getPublicId());
+        //            } catch (Exception e) {
+        //                // Log lỗi nhưng vẫn tiếp tục xóa user
+        //                log.error("Lỗi khi xóa avatar từ cloudinary: {}", e.getMessage());
+        //            }
+        //        }
 
         userRepo.delete(user);
-        return Response.successfulResponse("Xóa tài khoản người dùng thành công", "Xóa tài khoản người dùng thành công");
+        return Response.successfulResponse(
+                "Xóa tài khoản người dùng thành công", "Xóa tài khoản người dùng thành công");
     }
 }

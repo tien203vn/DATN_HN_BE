@@ -79,18 +79,22 @@ public class UserController {
                 .body(userService.getMyWallet(AuthUtil.getRequestedUser().getId()));
     }
 
-    @Operation(summary = "Get List of Users with PICK_UP or CONFIRM Orders",
-               description = "This API allows the owner to get a list of users with orders in PICK_UP or CONFIRM status.")
+    @Operation(
+            summary = "Get List of Users with PICK_UP or CONFIRM Orders",
+            description = "This API allows the owner to get a list of users with orders in PICK_UP or CONFIRM status.")
     @GetMapping(Endpoint.V1.User.GET_USER_BOOKING_PICKUP_CONFIRM)
-    public ResponseEntity<MetaResponse<MetaResponseDTO, List<UserBookingCountDTO>>> getListUserWithPickupOrConfirmOrders(
-            HttpServletRequest servletRequest, @ParameterObject MetaRequestDTO metaRequestDTO) {
+    public ResponseEntity<MetaResponse<MetaResponseDTO, List<UserBookingCountDTO>>>
+            getListUserWithPickupOrConfirmOrders(
+                    HttpServletRequest servletRequest, @ParameterObject MetaRequestDTO metaRequestDTO) {
         Integer userId =
                 Integer.valueOf(jwtTokenUtil.getAccountId(servletRequest.getHeader(HttpHeaders.AUTHORIZATION)));
         return ResponseEntity.status(HttpStatus.OK)
                 .body(userService.getListUserWithPickupOrConfirmOrders(metaRequestDTO, userId));
     }
 
-    @Operation(summary = "Toggle User Status", description = "This API allows admin to toggle user status (active/inactive).")
+    @Operation(
+            summary = "Toggle User Status",
+            description = "This API allows admin to toggle user status (active/inactive).")
     @PutMapping(Endpoint.V1.User.TOGGLE_STATUS)
     public ResponseEntity<Response<String>> toggleUserStatus(@PathVariable Integer id) {
         return ResponseEntity.status(HttpStatus.OK).body(userService.toggleUserStatus(id));

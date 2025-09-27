@@ -3,7 +3,6 @@ package net.codejava.service.impl;
 import java.io.IOException;
 import java.util.*;
 
-import net.codejava.domain.dto.meta.MetaRequestDTOV2;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -17,6 +16,7 @@ import net.codejava.constant.MetaConstant;
 import net.codejava.domain.dto.car.*;
 import net.codejava.domain.dto.image.UpdImageRequestDTO;
 import net.codejava.domain.dto.meta.MetaRequestDTO;
+import net.codejava.domain.dto.meta.MetaRequestDTOV2;
 import net.codejava.domain.dto.meta.MetaResponseDTO;
 import net.codejava.domain.dto.meta.SortingDTO;
 import net.codejava.domain.entity.Car;
@@ -68,7 +68,8 @@ public class CarServiceImpl implements CarService {
         Pageable pageable = PageRequest.of(metaRequestDTO.currentPage(), metaRequestDTO.pageSize(), sort);
         Page<Car> page = metaRequestDTO.keyword() == null
                 ? carRepo.getListCarByOwner(ownerId, pageable)
-                : carRepo.getListCarByOwnerWithKeyword(ownerId, metaRequestDTO.keyword().equals("0") ? false : true, pageable);
+                : carRepo.getListCarByOwnerWithKeyword(
+                        ownerId, metaRequestDTO.keyword().equals("0") ? false : true, pageable);
         if (page.getContent().isEmpty()) throw new AppException("List car is empty");
         List<CarResponseDTO> li = page.getContent().stream()
                 .map(temp -> carMapper.toCarResponseDTO(temp))
@@ -89,15 +90,14 @@ public class CarServiceImpl implements CarService {
     }
 
     @Override
-    public MetaResponse<MetaResponseDTO, List<CarResponseDTO>> getList(
-            MetaRequestDTOV2 metaRequestDTO) {
+    public MetaResponse<MetaResponseDTO, List<CarResponseDTO>> getList(MetaRequestDTOV2 metaRequestDTO) {
         Sort sort = metaRequestDTO.sortDir().equals(MetaConstant.Sorting.DEFAULT_DIRECTION)
                 ? Sort.by(metaRequestDTO.sortField()).ascending()
                 : Sort.by(metaRequestDTO.sortField()).descending();
         Pageable pageable = PageRequest.of(metaRequestDTO.currentPage(), metaRequestDTO.pageSize(), sort);
         Page<Car> page = metaRequestDTO.keyword() == null
-                ? carRepo.getList( pageable)
-                : carRepo.getListWithKeyword( metaRequestDTO.keyword().equals("0") ? false : true, pageable);
+                ? carRepo.getList(pageable)
+                : carRepo.getListWithKeyword(metaRequestDTO.keyword().equals("0") ? false : true, pageable);
         if (page.getContent().isEmpty()) throw new AppException("List car is empty");
         List<CarResponseDTO> li = page.getContent().stream()
                 .map(temp -> carMapper.toCarResponseDTO(temp))
@@ -180,7 +180,8 @@ public class CarServiceImpl implements CarService {
     }
 
     @Override
-    public MetaResponse<MetaResponseDTO, List<CarResponseDTO>> getListCarStopByOwner(MetaRequestDTO metaRequestDTO, Integer ownerId) {
+    public MetaResponse<MetaResponseDTO, List<CarResponseDTO>> getListCarStopByOwner(
+            MetaRequestDTO metaRequestDTO, Integer ownerId) {
         Optional<User> findUser = userRepo.findById(ownerId);
         if (findUser.isEmpty()) throw new AppException("This owner is not existed");
         Sort sort = metaRequestDTO.sortDir().equals(MetaConstant.Sorting.DEFAULT_DIRECTION)
@@ -340,8 +341,6 @@ public class CarServiceImpl implements CarService {
                         .build(),
                 li);
     }
-
-
 
     @Override
     public Response<List<CarDetailResponseDTO>> getAllCars() {

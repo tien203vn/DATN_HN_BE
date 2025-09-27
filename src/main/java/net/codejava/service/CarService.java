@@ -17,8 +17,7 @@ public interface CarService {
     MetaResponse<MetaResponseDTO, List<CarResponseDTO>> getListCarByOwner(
             MetaRequestDTO metaRequestDTO, Integer ownerId);
 
-    MetaResponse<MetaResponseDTO, List<CarResponseDTO>> getList(
-            MetaRequestDTOV2 metaRequestDTO);
+    MetaResponse<MetaResponseDTO, List<CarResponseDTO>> getList(MetaRequestDTOV2 metaRequestDTO);
 
     MetaResponse<MetaResponseDTO, List<CarResponseDTO>> getListCarActiveByOwner(
             MetaRequestDTO metaRequestDTO, Integer ownerId);
@@ -38,7 +37,7 @@ public interface CarService {
     Response<CarDetailResponseDTO> updateCar(Integer id, UpdCarRequestDTO requestDTO);
 
     Response<String> stopRentingCar(Integer carId);
-    
+
     Response<String> rentingCar(Integer carId);
 
     PageCriteria<List<CarResponseDTO>> searchCar(MetaRequestDTO requestDTO, String... search);

@@ -48,7 +48,7 @@ public class Booking {
     @Column(name = "compensation_fee")
     private Double compensationFee;
 
-    //Số tiền cho thuê
+    // Số tiền cho thuê
     @Column(name = "rental_amount")
     private Double rental_amount;
 
@@ -57,8 +57,8 @@ public class Booking {
     private Double total;
 
     public Double getTotal() {
-//        Integer hours = TimeUtil.getHoursDifference(startDateTime, endDateTime);
-//        return hours * (car.getBasePrice() / 24);
+        //        Integer hours = TimeUtil.getHoursDifference(startDateTime, endDateTime);
+        //        return hours * (car.getBasePrice() / 24);
         return rental_amount;
     }
 

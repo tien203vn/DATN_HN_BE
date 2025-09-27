@@ -127,20 +127,15 @@ public class BookingServiceImpl implements BookingService {
         LocalDateTime startDateTime = null;
         LocalDateTime endDateTime = null;
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        if (requestDTO.getStartDateTime() != null && !requestDTO.getStartDateTime().isEmpty()) {
+        if (requestDTO.getStartDateTime() != null
+                && !requestDTO.getStartDateTime().isEmpty()) {
             startDateTime = LocalDateTime.parse(requestDTO.getStartDateTime(), formatter);
         }
         if (requestDTO.getEndDateTime() != null && !requestDTO.getEndDateTime().isEmpty()) {
             endDateTime = LocalDateTime.parse(requestDTO.getEndDateTime(), formatter);
         }
         Page<Booking> page = bookingRepo.findBookingsByFilter(
-                userId,
-                status,
-                requestDTO.getCarName(),
-                startDateTime,
-                endDateTime,
-                pageable
-        );
+                userId, status, requestDTO.getCarName(), startDateTime, endDateTime, pageable);
 
         if (page.getContent().isEmpty()) throw new AppException("List booking is empty");
 
@@ -174,20 +169,16 @@ public class BookingServiceImpl implements BookingService {
         LocalDateTime startDateTime = null;
         LocalDateTime endDateTime = null;
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        if (requestDTO.getStartDateTime() != null && !requestDTO.getStartDateTime().isEmpty()) {
+        if (requestDTO.getStartDateTime() != null
+                && !requestDTO.getStartDateTime().isEmpty()) {
             startDateTime = LocalDateTime.parse(requestDTO.getStartDateTime(), formatter);
         }
         if (requestDTO.getEndDateTime() != null && !requestDTO.getEndDateTime().isEmpty()) {
             endDateTime = LocalDateTime.parse(requestDTO.getEndDateTime(), formatter);
         }
-        
+
         Page<Booking> page = bookingRepo.findAllBookingsByFilter(
-                status,
-                requestDTO.getCarName(),
-                startDateTime,
-                endDateTime,
-                pageable
-        );
+                status, requestDTO.getCarName(), startDateTime, endDateTime, pageable);
 
         if (page.getContent().isEmpty()) throw new AppException("Danh sách đặt xe trống");
 
@@ -290,7 +281,7 @@ public class BookingServiceImpl implements BookingService {
 
         // **Tính tiền thuê xe và gán vào cột rental_amount**
         long hours = TimeUtil.getHoursDifference(startDateTime, endDateTime);
-        double rentalAmount = hours * car.getBasePrice() /24;
+        double rentalAmount = hours * car.getBasePrice() / 24;
         newBooking.setRental_amount(rentalAmount);
 
         // Add Renter and Driver
@@ -460,8 +451,8 @@ public class BookingServiceImpl implements BookingService {
     @Transactional
     public Response<String> cancelBooking(Integer bookingId) throws MessagingException {
         // Lấy thông tin booking
-        Booking booking = bookingRepo.findById(bookingId)
-                .orElseThrow(() -> new AppException("This booking is not existed"));
+        Booking booking =
+                bookingRepo.findById(bookingId).orElseThrow(() -> new AppException("This booking is not existed"));
 
         // Kiểm tra trạng thái booking
         if (booking.getStatus() != BookingStatus.CONFIRMED && booking.getStatus() != BookingStatus.PENDING_DEPOSIT) {
@@ -684,7 +675,8 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional
-    public Response<String> completeBooking(Integer bookingId, String note, Integer lateMinutes, Double compensationFee) {
+    public Response<String> completeBooking(
+            Integer bookingId, String note, Integer lateMinutes, Double compensationFee) {
         Optional<Booking> findBooking = bookingRepo.findById(bookingId);
         if (findBooking.isEmpty()) {
             throw new AppException("Booking không tồn tại");
@@ -783,7 +775,8 @@ public class BookingServiceImpl implements BookingService {
             monthlySummary.put(month, count);
         }
 
-        return Response.successfulResponse("Lấy tổng số người dùng đã thuê xe theo từng tháng thành công.", monthlySummary);
+        return Response.successfulResponse(
+                "Lấy tổng số người dùng đã thuê xe theo từng tháng thành công.", monthlySummary);
     }
 
     @Override
@@ -824,13 +817,15 @@ public class BookingServiceImpl implements BookingService {
             String status = result[1].toString();
             Long count = (Long) result[2];
 
-            monthlyStatusSummary.get(month).add(Map.of(
-                    "name", status,
-                    "value", count
-            ));
+            monthlyStatusSummary
+                    .get(month)
+                    .add(Map.of(
+                            "name", status,
+                            "value", count));
         }
 
-        return Response.successfulResponse("Lấy tổng số đơn hàng theo trạng thái và tháng thành công.", monthlyStatusSummary);
+        return Response.successfulResponse(
+                "Lấy tổng số đơn hàng theo trạng thái và tháng thành công.", monthlyStatusSummary);
     }
 
     @Override
@@ -869,13 +864,13 @@ public class BookingServiceImpl implements BookingService {
         for (Object[] result : results) {
             Integer month = (Integer) result[0];
             Object repairCostObj = result[1];
-            Double repairCost = repairCostObj instanceof Integer
-                    ? ((Integer) repairCostObj).doubleValue()
-                    : (Double) repairCostObj;
+            Double repairCost =
+                    repairCostObj instanceof Integer ? ((Integer) repairCostObj).doubleValue() : (Double) repairCostObj;
             monthlyRepairCostSummary.put(month, repairCost);
         }
 
-        return Response.successfulResponse("Lấy tổng chi phí sửa chữa theo từng tháng thành công.", monthlyRepairCostSummary);
+        return Response.successfulResponse(
+                "Lấy tổng chi phí sửa chữa theo từng tháng thành công.", monthlyRepairCostSummary);
     }
 
     @Override
@@ -896,7 +891,8 @@ public class BookingServiceImpl implements BookingService {
             monthlyLateFeeSummary.put(month, lateFee);
         }
 
-        return Response.successfulResponse("Lấy tổng số tiền phí trả xe muộn theo từng tháng thành công.", monthlyLateFeeSummary);
+        return Response.successfulResponse(
+                "Lấy tổng số tiền phí trả xe muộn theo từng tháng thành công.", monthlyLateFeeSummary);
     }
 
     @Override
@@ -908,8 +904,7 @@ public class BookingServiceImpl implements BookingService {
                 .map(result -> Map.of(
                         "carId", result[0],
                         "carName", result[1],
-                        "totalRevenue", result[2]
-                ))
+                        "totalRevenue", result[2]))
                 .toList();
 
         return Response.successfulResponse("Lấy danh sách top 10 xe có doanh thu cao nhất thành công.", topRevenueCars);
@@ -927,8 +922,7 @@ public class BookingServiceImpl implements BookingService {
                 .map(result -> Map.of(
                         "carId", result[0],
                         "carName", result[1],
-                        "rentalCount", result[2]
-                ))
+                        "rentalCount", result[2]))
                 .toList();
 
         return Response.successfulResponse("Lấy danh sách Top 10 xe được thuê nhiều nhất thành công.", topRentedCars);
@@ -952,14 +946,16 @@ public class BookingServiceImpl implements BookingService {
             String carName = (String) result[2];
             Double totalRevenue = (Double) result[3];
 
-            monthlyTopRevenueCars.get(month).add(Map.of(
-                    "carId", carId,
-                    "carName", carName,
-                    "totalRevenue", totalRevenue
-            ));
+            monthlyTopRevenueCars
+                    .get(month)
+                    .add(Map.of(
+                            "carId", carId,
+                            "carName", carName,
+                            "totalRevenue", totalRevenue));
         }
 
-        return Response.successfulResponse("Lấy danh sách top xe có doanh thu cao nhất theo từng tháng thành công.", monthlyTopRevenueCars);
+        return Response.successfulResponse(
+                "Lấy danh sách top xe có doanh thu cao nhất theo từng tháng thành công.", monthlyTopRevenueCars);
     }
 
     @Override
@@ -980,14 +976,16 @@ public class BookingServiceImpl implements BookingService {
             String carName = (String) result[2];
             Long rentalCount = (Long) result[3];
 
-            monthlyTopRentedCars.get(month).add(Map.of(
-                    "carId", carId,
-                    "carName", carName,
-                    "rentalCount", rentalCount
-            ));
+            monthlyTopRentedCars
+                    .get(month)
+                    .add(Map.of(
+                            "carId", carId,
+                            "carName", carName,
+                            "rentalCount", rentalCount));
         }
 
-        return Response.successfulResponse("Lấy danh sách top xe được thuê nhiều nhất theo từng tháng thành công.", monthlyTopRentedCars);
+        return Response.successfulResponse(
+                "Lấy danh sách top xe được thuê nhiều nhất theo từng tháng thành công.", monthlyTopRentedCars);
     }
 
     // Admin methods - chỉ copy từ user methods và bỏ userId
@@ -1083,13 +1081,14 @@ public class BookingServiceImpl implements BookingService {
             String status = statusObj.toString(); // Chuyển enum thành String
             Long count = (Long) result[2];
 
-            monthlyStatusSummary.get(month).add(Map.of(
-                    "name", status,
-                    "value", count
-            ));
+            monthlyStatusSummary
+                    .get(month)
+                    .add(Map.of(
+                            "name", status,
+                            "value", count));
         }
 
-        return Response.successfulResponse("Lấy thống kê trạng thái đơn hàng theo từng tháng thành công.", monthlyStatusSummary);
+        return Response.successfulResponse(
+                "Lấy thống kê trạng thái đơn hàng theo từng tháng thành công.", monthlyStatusSummary);
     }
-
 }

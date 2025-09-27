@@ -10,6 +10,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import net.codejava.domain.enums.TransactionStatus;
 import net.codejava.domain.enums.TransactionType;
 
 @Entity
@@ -29,6 +30,9 @@ public class Transaction {
     @Enumerated(EnumType.STRING)
     private TransactionType transactionType;
 
+    @Enumerated(EnumType.STRING)
+    private TransactionStatus status;
+
     @Temporal(TemporalType.TIMESTAMP)
     @DateTimeFormat(pattern = "yyyy/MM/dd HH:mm:ss")
     private Date createdAt;
@@ -36,6 +40,13 @@ public class Transaction {
     private Integer bookingId;
 
     private String carName;
+
+    @Column(unique = true)
+    private String paymentReference;
+
+    private String gatewayTransactionNo;
+
+    private String paymentGateway;
 
     @ManyToOne(targetEntity = User.class, fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id")

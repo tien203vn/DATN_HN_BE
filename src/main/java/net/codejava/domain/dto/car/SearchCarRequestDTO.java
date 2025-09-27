@@ -6,7 +6,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
-import net.codejava.annotation.AfterNowTime;
 import net.codejava.annotation.RentalTimeMatching;
 import net.codejava.constant.TimeFormatConstant;
 
@@ -15,7 +14,7 @@ public record SearchCarRequestDTO(
         @RequestParam(name = "address") String address,
         @RequestParam(name = "startTime")
                 @NotBlank(message = "The start rental time is not blank")
-               // @AfterNowTime(message = "The start rental time is after now")
+                // @AfterNowTime(message = "The start rental time is after now")
                 @JsonFormat(pattern = TimeFormatConstant.DATETIME_FORMAT)
                 String startTime,
         @RequestParam(name = "endTime")

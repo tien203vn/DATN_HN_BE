@@ -1,23 +1,18 @@
 package net.codejava.domain.dto.meta;
 
-import net.codejava.constant.MetaConstant;
-import org.springframework.web.bind.annotation.RequestParam;
-
 import java.util.Objects;
 
+import org.springframework.web.bind.annotation.RequestParam;
+
+import net.codejava.constant.MetaConstant;
+
 public record MetaRequestDTOV2(
-        @RequestParam(name = "currenPage", required = false)
-        Integer currentPage,
-        @RequestParam(name = "size", required = false)
-        Integer pageSize,
-        @RequestParam(name = "sortField", required = false)
-        String sortField,
-        @RequestParam(name = "sortDir", required = false)
-        String sortDir,
-        @RequestParam(name = "keyword", required = false)
-        String keyword,
-        @RequestParam(name = "search", required = false, defaultValue = "")
-        String... search) {
+        @RequestParam(name = "currenPage", required = false) Integer currentPage,
+        @RequestParam(name = "size", required = false) Integer pageSize,
+        @RequestParam(name = "sortField", required = false) String sortField,
+        @RequestParam(name = "sortDir", required = false) String sortDir,
+        @RequestParam(name = "keyword", required = false) String keyword,
+        @RequestParam(name = "search", required = false, defaultValue = "") String... search) {
     public Integer currentPage() {
         return Objects.requireNonNullElse(this.currentPage, MetaConstant.Pagination.DEFAULT_CURRENT_PAGE);
     }
@@ -34,4 +29,3 @@ public record MetaRequestDTOV2(
         return Objects.requireNonNullElse(this.sortDir, MetaConstant.Sorting.DEFAULT_DIRECTION);
     }
 }
-

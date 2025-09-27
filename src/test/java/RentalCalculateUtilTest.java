@@ -41,7 +41,7 @@ public class RentalCalculateUtilTest {
     public void testCalculateMoney_HalfDay() {
         Date startDateTime = new Date();
         Date endDateTime = new Date(startDateTime.getTime() + TimeUnit.HOURS.toMillis(12)); // 12 hours later
-        Double basicPrice = 240.0;
+        Double basicPrice = 10.0;
 
         Double result = rentalCalculateUtil.calculateMoney(startDateTime, endDateTime, basicPrice);
 
@@ -52,7 +52,7 @@ public class RentalCalculateUtilTest {
     public void testCalculateMoney_QuarterDay() {
         Date startDateTime = new Date();
         Date endDateTime = new Date(startDateTime.getTime() + TimeUnit.HOURS.toMillis(6)); // 6 hours later
-        Double basicPrice = 240.0;
+        Double basicPrice = 10.0;
 
         Double result = rentalCalculateUtil.calculateMoney(startDateTime, endDateTime, basicPrice);
 

@@ -22,14 +22,16 @@ import net.codejava.constant.Endpoint;
 public class SecurityConfig {
     private final JwtTokenFilter jwtTokenFilter;
     private static final String CATCH_ALL_WILDCARDS = "/**";
-    public static final String[] PUBLIC_ENDPOINTS = {
+    protected static final String[] PUBLIC_ENDPOINTS = {
         "/api/v1/test" + CATCH_ALL_WILDCARDS,
         "/api-docs" + CATCH_ALL_WILDCARDS,
         "/swagger-ui" + CATCH_ALL_WILDCARDS,
         "/v3/api-docs" + CATCH_ALL_WILDCARDS,
         Endpoint.V1.Auth.BASE + CATCH_ALL_WILDCARDS,
         Endpoint.V1.Car.GET_DETAIL,
-        Endpoint.V1.Car.SEARCH_CAR
+        Endpoint.V1.Car.SEARCH_CAR,
+        Endpoint.V1.Payment.VNPAY_RETURN,
+        Endpoint.V1.Payment.VNPAY_IPN
     };
 
     @Bean

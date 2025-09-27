@@ -19,7 +19,7 @@ public class Endpoint {
             public static final String GET_DETAIL = BASE + "/my-profile";
             public static final String UPDATE = BASE + "/update";
             public static final String GET_MONEY_IN_WALLET = BASE + "/wallet";
-            public static final String GET_USER_BOOKING_PICKUP_CONFIRM =BASE + "/renting";
+            public static final String GET_USER_BOOKING_PICKUP_CONFIRM = BASE + "/renting";
             public static final String TOGGLE_STATUS = BASE + "/toggle-status/{id}";
             public static final String DELETE_USER = BASE + "/delete/{id}";
         }
@@ -56,7 +56,7 @@ public class Endpoint {
             public static final String CONFIRM_PAYMENT = BASE + "/confirm-payment/{id}";
             public static final String CANCELLED_BOOKING = BASE + "/cancel/{id}";
             public static final String RETURN_CAR = BASE + "/return-car/{id}";
-            
+
             // Admin endpoints
             public static final String ADMIN_MONTHLY_SUMMARY = BASE + "/admin/monthly-summary";
             public static final String ADMIN_MONTHLY_PRODUCT_SUMMARY = BASE + "/admin/monthly-product-summary";
@@ -75,6 +75,13 @@ public class Endpoint {
         public static final class Transaction {
             public static final String BASE = PREFIX + "/transaction";
             public static final String GET_LIST = BASE;
+        }
+
+        public static final class Payment {
+            public static final String BASE = PREFIX + "/payment";
+            public static final String VNPAY_CREATE = BASE + "/vnpay/create";
+            public static final String VNPAY_RETURN = BASE + "/vnpay/return";
+            public static final String VNPAY_IPN = BASE + "/vnpay/ipn";
         }
 
         public static final class Feedback {

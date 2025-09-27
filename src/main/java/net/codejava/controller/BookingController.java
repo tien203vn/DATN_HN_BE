@@ -43,7 +43,9 @@ public class BookingController {
                 .body(bookingService.getListBookingForUserManager(metaRequestDTO, userId));
     }
 
-    @io.swagger.v3.oas.annotations.Operation(summary = "Get All Bookings", description = "This API allows admin to get all bookings with filters.")
+    @io.swagger.v3.oas.annotations.Operation(
+            summary = "Get All Bookings",
+            description = "This API allows admin to get all bookings with filters.")
     @GetMapping(Endpoint.V1.Booking.GET_ALL_BOOKINGS)
     public ResponseEntity<MetaResponse<MetaResponseDTO, List<BookingResponseDTO>>> getAllBookings(
             @ParameterObject BookingFilterDTO requestDTO) {
@@ -115,12 +117,12 @@ public class BookingController {
         //        }
     }
 
-//    @PatchMapping(Endpoint.V1.Booking.CANCELLED_BOOKING)
-//    public ResponseEntity<Response<String>> cancelBooking(@PathVariable(name = "id") Integer bookingId)
-//            throws MessagingException {
-//        return ResponseEntity.status(HttpStatus.OK)
-//                .body(bookingService.cancelBooking(AuthUtil.getRequestedUser().getId(), bookingId));
-//    }
+    //    @PatchMapping(Endpoint.V1.Booking.CANCELLED_BOOKING)
+    //    public ResponseEntity<Response<String>> cancelBooking(@PathVariable(name = "id") Integer bookingId)
+    //            throws MessagingException {
+    //        return ResponseEntity.status(HttpStatus.OK)
+    //                .body(bookingService.cancelBooking(AuthUtil.getRequestedUser().getId(), bookingId));
+    //    }
 
     @PatchMapping(Endpoint.V1.Booking.RETURN_CAR)
     public ResponseEntity<Response<String>> returnCar(@PathVariable(name = "id") Integer bookingId)
@@ -140,16 +142,15 @@ public class BookingController {
     }
 
     @PatchMapping("/api/v1/booking/cancel/{id}")
-    public ResponseEntity<Response<String>> cancelBooking(@PathVariable("id") Integer bookingId) throws MessagingException {
-//        Integer userId = AuthUtil.getRequestedUser().getId();
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(bookingService.cancelBooking( bookingId));
+    public ResponseEntity<Response<String>> cancelBooking(@PathVariable("id") Integer bookingId)
+            throws MessagingException {
+        //        Integer userId = AuthUtil.getRequestedUser().getId();
+        return ResponseEntity.status(HttpStatus.OK).body(bookingService.cancelBooking(bookingId));
     }
 
     @PostMapping("/api/v1/booking/complete/{id}")
     public ResponseEntity<Response<String>> completeBooking(
-            @PathVariable("id") Integer bookingId,
-            @RequestBody Map<String, Object> payload) {
+            @PathVariable("id") Integer bookingId, @RequestBody Map<String, Object> payload) {
         String note = (String) payload.get("note");
         Integer lateMinutes = (Integer) payload.get("lateMinutes");
         Double compensationFee = ((Number) payload.get("compensationFee")).doubleValue();
@@ -158,11 +159,10 @@ public class BookingController {
     }
 
     @GetMapping("/api/v1/booking/monthly-summary")
-    public ResponseEntity<Response<Map<Integer, Long>>> getMonthlyBookingSummary( HttpServletRequest servletRequest) {
+    public ResponseEntity<Response<Map<Integer, Long>>> getMonthlyBookingSummary(HttpServletRequest servletRequest) {
         Integer userId =
                 Integer.valueOf(jwtTokenUtil.getAccountId(servletRequest.getHeader(HttpHeaders.AUTHORIZATION)));
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(bookingService.getMonthlyBookingSummary(userId));
+        return ResponseEntity.status(HttpStatus.OK).body(bookingService.getMonthlyBookingSummary(userId));
     }
 
     @GetMapping("/api/v1/booking/monthly-product-summary")
@@ -174,104 +174,114 @@ public class BookingController {
 
     @GetMapping("/api/v1/booking/monthly-customer-summary")
     public ResponseEntity<Response<Map<Integer, Long>>> getMonthlyCustomerSummary(HttpServletRequest servletRequest) {
-        Integer userId = Integer.valueOf(jwtTokenUtil.getAccountId(servletRequest.getHeader(HttpHeaders.AUTHORIZATION)));
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(bookingService.getMonthlyCustomerSummary(userId));
+        Integer userId =
+                Integer.valueOf(jwtTokenUtil.getAccountId(servletRequest.getHeader(HttpHeaders.AUTHORIZATION)));
+        return ResponseEntity.status(HttpStatus.OK).body(bookingService.getMonthlyCustomerSummary(userId));
     }
 
     @GetMapping("/api/v1/booking/monthly-hours-summary")
     public ResponseEntity<Response<Map<Integer, Long>>> getMonthlyHoursSummary(HttpServletRequest servletRequest) {
-        Integer userId = Integer.valueOf(jwtTokenUtil.getAccountId(servletRequest.getHeader(HttpHeaders.AUTHORIZATION)));
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(bookingService.getMonthlyHoursSummary(userId));
+        Integer userId =
+                Integer.valueOf(jwtTokenUtil.getAccountId(servletRequest.getHeader(HttpHeaders.AUTHORIZATION)));
+        return ResponseEntity.status(HttpStatus.OK).body(bookingService.getMonthlyHoursSummary(userId));
     }
 
     @GetMapping("/api/v1/booking/monthly-status-summary")
     public ResponseEntity<Response<Map<Integer, List<Map<String, Object>>>>> getMonthlyStatusSummary(
             HttpServletRequest servletRequest) {
-        Integer userId = Integer.valueOf(jwtTokenUtil.getAccountId(servletRequest.getHeader(HttpHeaders.AUTHORIZATION)));
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(bookingService.getMonthlyStatusSummary(userId));
+        Integer userId =
+                Integer.valueOf(jwtTokenUtil.getAccountId(servletRequest.getHeader(HttpHeaders.AUTHORIZATION)));
+        return ResponseEntity.status(HttpStatus.OK).body(bookingService.getMonthlyStatusSummary(userId));
     }
 
     @GetMapping("/api/v1/booking/monthly-revenue-summary")
     public ResponseEntity<Response<Map<Integer, Double>>> getMonthlyRevenueSummary(HttpServletRequest servletRequest) {
-        Integer userId = Integer.valueOf(jwtTokenUtil.getAccountId(servletRequest.getHeader(HttpHeaders.AUTHORIZATION)));
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(bookingService.getMonthlyRevenueSummary(userId));
+        Integer userId =
+                Integer.valueOf(jwtTokenUtil.getAccountId(servletRequest.getHeader(HttpHeaders.AUTHORIZATION)));
+        return ResponseEntity.status(HttpStatus.OK).body(bookingService.getMonthlyRevenueSummary(userId));
     }
 
     @GetMapping("/api/v1/booking/monthly-repair-cost-summary")
     public ResponseEntity<Response<Map<Integer, Double>>> getMonthlyRepairCostSummary(
             HttpServletRequest servletRequest) {
-        Integer userId = Integer.valueOf(jwtTokenUtil.getAccountId(servletRequest.getHeader(HttpHeaders.AUTHORIZATION)));
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(bookingService.getMonthlyRepairCostSummary(userId));
+        Integer userId =
+                Integer.valueOf(jwtTokenUtil.getAccountId(servletRequest.getHeader(HttpHeaders.AUTHORIZATION)));
+        return ResponseEntity.status(HttpStatus.OK).body(bookingService.getMonthlyRepairCostSummary(userId));
     }
 
     @GetMapping("/api/v1/booking/monthly-late-fee-summary")
     public ResponseEntity<Response<Map<Integer, Double>>> getMonthlyLateFeeSummary(HttpServletRequest servletRequest) {
-        Integer userId = Integer.valueOf(jwtTokenUtil.getAccountId(servletRequest.getHeader(HttpHeaders.AUTHORIZATION)));
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(bookingService.getMonthlyLateFeeSummary(userId));
+        Integer userId =
+                Integer.valueOf(jwtTokenUtil.getAccountId(servletRequest.getHeader(HttpHeaders.AUTHORIZATION)));
+        return ResponseEntity.status(HttpStatus.OK).body(bookingService.getMonthlyLateFeeSummary(userId));
     }
 
     @GetMapping("/api/v1/booking/top-revenue-cars")
     public ResponseEntity<Response<List<Map<String, Object>>>> getTopRevenueCars(HttpServletRequest servletRequest) {
-        Integer userId = Integer.valueOf(jwtTokenUtil.getAccountId(servletRequest.getHeader(HttpHeaders.AUTHORIZATION)));
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(bookingService.getTopRevenueCars(userId));
+        Integer userId =
+                Integer.valueOf(jwtTokenUtil.getAccountId(servletRequest.getHeader(HttpHeaders.AUTHORIZATION)));
+        return ResponseEntity.status(HttpStatus.OK).body(bookingService.getTopRevenueCars(userId));
     }
 
     @GetMapping("/api/v1/booking/top-rented-cars")
     public ResponseEntity<Response<List<Map<String, Object>>>> getTopRentedCars(HttpServletRequest servletRequest) {
-        Integer userId = Integer.valueOf(jwtTokenUtil.getAccountId(servletRequest.getHeader(HttpHeaders.AUTHORIZATION)));
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(bookingService.getTopRentedCars(userId));
+        Integer userId =
+                Integer.valueOf(jwtTokenUtil.getAccountId(servletRequest.getHeader(HttpHeaders.AUTHORIZATION)));
+        return ResponseEntity.status(HttpStatus.OK).body(bookingService.getTopRentedCars(userId));
     }
 
     @GetMapping("/api/v1/booking/monthly-top-revenue-cars")
     public ResponseEntity<Response<Map<Integer, List<Map<String, Object>>>>> getMonthlyTopRevenueCars(
             HttpServletRequest servletRequest) {
-        Integer userId = Integer.valueOf(jwtTokenUtil.getAccountId(servletRequest.getHeader(HttpHeaders.AUTHORIZATION)));
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(bookingService.getMonthlyTopRevenueCars(userId));
+        Integer userId =
+                Integer.valueOf(jwtTokenUtil.getAccountId(servletRequest.getHeader(HttpHeaders.AUTHORIZATION)));
+        return ResponseEntity.status(HttpStatus.OK).body(bookingService.getMonthlyTopRevenueCars(userId));
     }
 
     @GetMapping("/api/v1/booking/monthly-top-rented-cars")
     public ResponseEntity<Response<Map<Integer, List<Map<String, Object>>>>> getMonthlyTopRentedCars(
             HttpServletRequest servletRequest) {
-        Integer userId = Integer.valueOf(jwtTokenUtil.getAccountId(servletRequest.getHeader(HttpHeaders.AUTHORIZATION)));
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(bookingService.getMonthlyTopRentedCars(userId));
+        Integer userId =
+                Integer.valueOf(jwtTokenUtil.getAccountId(servletRequest.getHeader(HttpHeaders.AUTHORIZATION)));
+        return ResponseEntity.status(HttpStatus.OK).body(bookingService.getMonthlyTopRentedCars(userId));
     }
 
     // Admin endpoints - chỉ 4 API như yêu cầu
-    @io.swagger.v3.oas.annotations.Operation(summary = "Admin: Monthly Summary", description = "Admin version of monthly-summary")
+    @io.swagger.v3.oas.annotations.Operation(
+            summary = "Admin: Monthly Summary",
+            description = "Admin version of monthly-summary")
     @GetMapping("/api/v1/booking/admin/monthly-summary")
     public ResponseEntity<Response<Map<Integer, Long>>> adminMonthlyBookingSummary() {
         return ResponseEntity.status(HttpStatus.OK).body(bookingService.adminMonthlyBookingSummary());
     }
 
-    @io.swagger.v3.oas.annotations.Operation(summary = "Admin: Monthly Product Summary", description = "Admin version of monthly-product-summary")
+    @io.swagger.v3.oas.annotations.Operation(
+            summary = "Admin: Monthly Product Summary",
+            description = "Admin version of monthly-product-summary")
     @GetMapping("/api/v1/booking/admin/monthly-product-summary")
     public ResponseEntity<Response<Map<Integer, Long>>> adminMonthlyProductSummary() {
         return ResponseEntity.status(HttpStatus.OK).body(bookingService.adminMonthlyProductSummary());
     }
 
-    @io.swagger.v3.oas.annotations.Operation(summary = "Admin: Monthly Customer Summary", description = "Admin version of monthly-customer-summary")
+    @io.swagger.v3.oas.annotations.Operation(
+            summary = "Admin: Monthly Customer Summary",
+            description = "Admin version of monthly-customer-summary")
     @GetMapping("/api/v1/booking/admin/monthly-customer-summary")
     public ResponseEntity<Response<Map<Integer, Long>>> adminMonthlyCustomerSummary() {
         return ResponseEntity.status(HttpStatus.OK).body(bookingService.adminMonthlyCustomerSummary());
     }
 
-    @io.swagger.v3.oas.annotations.Operation(summary = "Admin: Monthly Hours Summary", description = "Admin version of monthly-hours-summary")
+    @io.swagger.v3.oas.annotations.Operation(
+            summary = "Admin: Monthly Hours Summary",
+            description = "Admin version of monthly-hours-summary")
     @GetMapping("/api/v1/booking/admin/monthly-hours-summary")
     public ResponseEntity<Response<Map<Integer, Long>>> adminMonthlyHoursSummary() {
         return ResponseEntity.status(HttpStatus.OK).body(bookingService.adminMonthlyHoursSummary());
     }
 
-    @io.swagger.v3.oas.annotations.Operation(summary = "Admin: Monthly Status Summary", description = "Admin version of monthly-status-summary")
+    @io.swagger.v3.oas.annotations.Operation(
+            summary = "Admin: Monthly Status Summary",
+            description = "Admin version of monthly-status-summary")
     @GetMapping("/api/v1/booking/admin/monthly-status-summary")
     public ResponseEntity<Response<Map<Integer, List<Map<String, Object>>>>> adminMonthlyStatusSummary() {
         return ResponseEntity.status(HttpStatus.OK).body(bookingService.adminMonthlyStatusSummary());

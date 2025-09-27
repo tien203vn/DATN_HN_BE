@@ -1,5 +1,7 @@
 package net.codejava.repository;
 
+import java.util.Optional;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -21,4 +23,6 @@ public interface TransactionRepository extends JpaRepository<Transaction, Intege
             nativeQuery = true)
     Page<Transaction> getListByUserId(
             @Param("userId") Integer userId, String startTime, String endTime, Pageable pageable);
+
+    Optional<Transaction> findByPaymentReference(String paymentReference);
 }
