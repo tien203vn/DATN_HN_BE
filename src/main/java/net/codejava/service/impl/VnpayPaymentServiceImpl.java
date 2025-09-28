@@ -145,7 +145,7 @@ public class VnpayPaymentServiceImpl implements VnpayPaymentService {
                     "Không tìm thấy người dùng",
                     false,
                     context.txnRef(),
-                    context.amount(),
+                    context.amount()/1000000,
                     context.responseCode(),
                     context.transactionStatus());
         }
@@ -162,7 +162,7 @@ public class VnpayPaymentServiceImpl implements VnpayPaymentService {
                         "Giao dịch đã được xác nhận",
                         true,
                         context.txnRef(),
-                        context.amount(),
+                        context.amount()/1000000,
                         context.responseCode(),
                         context.transactionStatus());
             }
@@ -175,7 +175,7 @@ public class VnpayPaymentServiceImpl implements VnpayPaymentService {
 
         Transaction newTransaction =
                 transactionMapper.addSystemTransactionRequestToEntity(AddSystemTransactionRequestDTO.builder()
-                        .amount((double) context.amount())
+                        .amount((double) context.amount()/1000000)
                         .transactionType(TransactionType.TOP_UP)
                         .bookingId(null)
                         .carName("Nạp ví qua VNPAY")
