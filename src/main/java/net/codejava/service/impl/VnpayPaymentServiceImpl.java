@@ -85,7 +85,7 @@ public class VnpayPaymentServiceImpl implements VnpayPaymentService {
         params.put("vnp_Locale", locale);
         params.put(
                 "vnp_ReturnUrl",
-                StringUtils.hasText(requestDTO.returnUrl()) ? requestDTO.returnUrl() : properties.getReturnUrl());
+                 properties.getReturnUrl());
         params.put("vnp_IpAddr", StringUtils.hasText(clientIpAddress) ? clientIpAddress : "127.0.0.1");
         params.put("vnp_CreateDate", now.format(VNPAY_TIME_FORMAT));
         params.put("vnp_ExpireDate", expireAt.format(VNPAY_TIME_FORMAT));
@@ -276,7 +276,7 @@ public class VnpayPaymentServiceImpl implements VnpayPaymentService {
 
     private void increaseWalletBalance(User user, long amount) {
         double currentWallet = user.getWallet() == null ? 0d : user.getWallet();
-        user.setWallet(currentWallet + amount);
+        user.setWallet(currentWallet + amount/1000000);
         userRepository.save(user);
     }
 

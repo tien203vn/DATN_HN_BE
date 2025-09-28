@@ -10,4 +10,4 @@ import lombok.Builder;
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record VnpayCreatePaymentRequestDTO(
-        @NotNull @Min(1000) Long amount, String bankCode, String language, String returnUrl) {}
+        @NotNull Long amount, String bankCode, String language, String returnUrl) {}

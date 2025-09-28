@@ -1,5 +1,7 @@
 package net.codejava.controller;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -37,6 +39,10 @@ public class PaymentController {
 //    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<Response<VnpayCreatePaymentResponseDTO>> createWalletTopUp(
             @Valid @RequestBody VnpayCreatePaymentRequestDTO requestDTO, HttpServletRequest servletRequest) {
+        if (requestDTO.amount() < 10000) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Response.failedResponse(HttpStatus.BAD_REQUEST.value(), "Số tiền nạp không hợp lệ"));
+        }
         String clientIp = extractClientIp(servletRequest);
         VnpayCreatePaymentResponseDTO responseDTO =
                 vnpayPaymentService.createWalletTopUp(AuthUtil.getRequestedUser(), requestDTO, clientIp);
@@ -54,8 +60,15 @@ public class PaymentController {
     @GetMapping(value = Endpoint.V1.Payment.VNPAY_RETURN, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Response<VnpayReturnResponseDTO>> handleReturn(HttpServletRequest servletRequest) {
         VnpayReturnResponseDTO responseDTO = vnpayPaymentService.handleReturnUrl(extractParams(servletRequest));
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(Response.successfulResponse("Đã ghi nhận kết quả giao dịch", responseDTO));
+        String redirectUrl = String.format("http://localhost:3000/payment-return?success=%s&message=%s&amount=%s&txnRef=%s",
+                responseDTO.success(),
+                URLEncoder.encode(responseDTO.message(), StandardCharsets.UTF_8),
+                responseDTO.amount(),
+                responseDTO.transactionReference());
+
+        return ResponseEntity.status(HttpStatus.FOUND)
+                .header("Location", redirectUrl)
+                .build();
     }
 
     private Map<String, String> extractParams(HttpServletRequest request) {
