@@ -16,6 +16,6 @@ public class BookingCarCancelSyncJob implements Job {
 
     @Override
     public void execute(JobExecutionContext context) throws JobExecutionException {
-        // bookingService.syncCancelStatus();
+         bookingService.syncCancelStatus();
     }
 }

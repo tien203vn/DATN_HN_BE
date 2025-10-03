@@ -114,7 +114,8 @@ public class BookingServiceImpl implements BookingService {
             BookingFilterDTO requestDTO, Integer userId) {
         Optional<User> findUser = userRepo.findById(userId);
         if (findUser.isEmpty()) throw new AppException("This user is not existed");
-        Pageable pageable = PageRequest.of(requestDTO.getCurrentPage(), requestDTO.getLimit());
+        Sort sort = Sort.by("id").descending();
+        Pageable pageable = PageRequest.of(requestDTO.getCurrentPage(), requestDTO.getLimit(),sort);
         BookingStatus status = null;
         if (requestDTO.getBookingStatus() != null) {
             try {
@@ -627,6 +628,7 @@ public class BookingServiceImpl implements BookingService {
                 booking.setStatus(BookingStatus.CANCELLED);
                 Car car = booking.getCar();
                 car.setIsAvailable(true);
+                car.setIsStopped(false);
                 carRepo.save(car);
                 bookingRepo.save(booking);
 
