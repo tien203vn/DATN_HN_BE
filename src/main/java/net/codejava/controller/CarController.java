@@ -117,4 +117,9 @@ public class CarController {
     public ResponseEntity<Response<List<CarDetailResponseDTO>>> getAllCars() {
         return ResponseEntity.ok(carService.getAllCars());
     }
+
+    @DeleteMapping(Endpoint.V1.Car.DELETE_CAR)
+    public ResponseEntity<Response<String>> deleteCar(@PathVariable(name = "id") Integer id) {
+        return ResponseEntity.status(HttpStatus.OK).body(carService.deleteCar(id));
+    }
 }

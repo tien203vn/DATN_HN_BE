@@ -46,4 +46,6 @@ public interface CarService {
             String address, String startTime, String endTime, MetaRequestDTO metaRequestDTO);
 
     Response<List<CarDetailResponseDTO>> getAllCars();
+
+    Response<String> deleteCar(Integer id);
 }

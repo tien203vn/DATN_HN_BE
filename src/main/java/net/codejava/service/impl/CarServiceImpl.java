@@ -3,6 +3,9 @@ package net.codejava.service.impl;
 import java.io.IOException;
 import java.util.*;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -12,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import net.codejava.constant.MetaConstant;
 import net.codejava.domain.dto.car.*;
 import net.codejava.domain.dto.image.UpdImageRequestDTO;
@@ -19,12 +23,15 @@ import net.codejava.domain.dto.meta.MetaRequestDTO;
 import net.codejava.domain.dto.meta.MetaRequestDTOV2;
 import net.codejava.domain.dto.meta.MetaResponseDTO;
 import net.codejava.domain.dto.meta.SortingDTO;
+import net.codejava.domain.entity.Booking;
 import net.codejava.domain.entity.Car;
 import net.codejava.domain.entity.Image;
 import net.codejava.domain.entity.User;
+import net.codejava.domain.enums.BookingStatus;
 import net.codejava.domain.enums.UserType;
 import net.codejava.domain.mapper.CarMapper;
 import net.codejava.exceptions.AppException;
+import net.codejava.repository.BookingRepository;
 import net.codejava.repository.CarRepository;
 import net.codejava.repository.UserRepository;
 import net.codejava.repository.criteria.CarSearchCriteria;
@@ -34,16 +41,23 @@ import net.codejava.responses.Response;
 import net.codejava.service.CarService;
 import net.codejava.service.CloudinaryService;
 import net.codejava.service.ImageService;
+import net.codejava.utility.MailSenderUtil;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CarServiceImpl implements CarService {
     private final UserRepository userRepo;
     private final CarRepository carRepo;
+    private final BookingRepository bookingRepo;
     private final CloudinaryService cloudinaryService;
     private final CarMapper carMapper;
     private final ImageService imageService;
     private final CarSearchCriteria carSearchCriteria;
+    private final MailSenderUtil mailSenderUtil;
+
+    @PersistenceContext
+    private final EntityManager em;
 
     @Value("${cloudinary.folder.car}")
     private String carFolder;
@@ -355,5 +369,84 @@ public class CarServiceImpl implements CarService {
                 .toList();
 
         return Response.successfulResponse("Get all cars successful", carDTOs);
+    }
+
+    @Override
+    @Transactional
+    public Response<String> deleteCar(Integer id) {
+        log.info("Starting delete car process for id: {}", id);
+        
+        Optional<Car> optionalCar = carRepo.findById(id);
+        if (optionalCar.isEmpty()) {
+            log.warn("Car not found with id: {}", id);
+            throw new AppException("Car not found with id: " + id);
+        }
+
+        Car car = optionalCar.get();
+        log.info("Found car: {} with {} bookings and {} images", 
+                car.getName(), car.getBooking().size(), car.getImages().size());
+        
+        // Kiểm tra xe có đang được thuê không (trạng thái CONFIRMED hoặc PICK_UP)
+        List<Booking> activeBookings = car.getBooking().stream()
+                .filter(booking -> booking.getStatus() == BookingStatus.CONFIRMED || 
+                                 booking.getStatus() == BookingStatus.PICK_UP)
+                .toList();
+        
+        log.info("Found {} active bookings for car id: {}", activeBookings.size(), id);
+        
+        if (!activeBookings.isEmpty()) {
+            log.warn("Cannot delete car id: {} - has {} active bookings", id, activeBookings.size());
+            throw new AppException("Không thể xóa xe đang được thuê. Xe hiện có " + 
+                                 activeBookings.size() + " đơn hàng đang hoạt động.");
+        }
+        
+        User carOwner = car.getCarOwner();
+        
+        // Gửi email thông báo cho chủ xe trước khi xóa
+//        try {
+//            if (carOwner != null && carOwner.getEmail() != null) {
+//                log.info("Sending email notification to car owner: {}", carOwner.getEmail());
+//                String subject = "Thông báo xóa xe - Hệ thống thuê xe";
+//                String content = "Xe của bạn đã bị xóa bởi người quản trị hệ thống, vui lòng liên hệ người quản trị để biết thêm chi tiết";
+//                mailSenderUtil.sendBasicMail(carOwner.getEmail(), subject, content);
+//            }
+//        } catch (Exception e) {
+//            log.error("Failed to send email notification: {}", e.getMessage());
+//            // Continue with deletion even if email fails
+//        }
+
+        try {
+            log.info("Attempting to delete car using entity delete for id: {}", id);
+            
+            // Clear relationships để tránh foreign key constraints
+            log.info("Clearing car relationships before deletion");
+            car.getImages().clear();
+            car.getBooking().clear();
+
+            // Save changes trước khi xóa
+            carRepo.save(car);
+            em.flush();
+            em.clear(); // Clear persistence context
+            
+            // Reload và xóa car entity
+            log.info("Reloading and deleting car entity for id: {}", id);
+            Optional<Car> reloadedCar = carRepo.findById(id);
+            if (reloadedCar.isPresent()) {
+                carRepo.delete(reloadedCar.get());
+                em.flush();
+                log.info("Car entity deleted successfully");
+            } else {
+                // Fallback: sử dụng deleteById
+                log.info("Using deleteById as fallback");
+                carRepo.deleteById(id);
+                em.flush();
+            }
+            carRepo.deleteCarById(car.getId());
+            log.info("Successfully deleted car with id: {}", id);
+            return Response.successfulResponse("Car deleted successfully", "Car with id " + id + " has been deleted");
+        } catch (Exception e) {
+            log.error("Failed to delete car with id: {}, error: {}", id, e.getMessage(), e);
+            throw new AppException("Không thể xóa xe. Lỗi: " + e.getMessage());
+        }
     }
 }
